@@ -9,7 +9,7 @@ class MateriaController extends Controller
 {
     public function normalizar(Request $request)
     {
-        // Obtener la entrada del usuario
+        // Obtener la entrada del usuario   
         $entrada = $request->input('entrada');
 
         // Crear un cliente HTTP
