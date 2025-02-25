@@ -1,0 +1,9 @@
+CONFIGURACION ADICIONAL PARA LARAVEL V1.1
+
+--API MATERIAS 
+pip install fuzzywuzzy
+pip install python-Levenshtein 
+pip install Flask
+composer require guzzlehttp/guzzle
+--EXCEL
+composer require phpoffice/phpspreadsheet
