@@ -30,10 +30,6 @@
         <br><br>
         <button type="submit">Subir Archivo</button>
     </form>
-
-    <!-- ---------------------------------------------------------------------------- -->
-    <!-- Mostrar la lista -->
-
     
 </body>
 </html>

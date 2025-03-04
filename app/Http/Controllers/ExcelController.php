@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\File;
 
 
@@ -57,6 +59,10 @@ class ExcelController extends Controller
     public $c_clave = [];
     public $c_nombre = [];
 
+    public $c_materias = [];
+    public $c_escuelas = [];
+    public $c_trabajos = [];
+
 
     public function upload(Request $request)
     {
@@ -99,20 +105,52 @@ class ExcelController extends Controller
     
         // Contar el número de columnas
         $columnCount = count($headers);
+
+        //--------------------------materias-----------------------------
+        if($columnCount === 17)
+        {
+            $c_materias = array_column($data, 10);
+            array_shift($c_materias);
+            array_shift($c_materias); 
+
+            $c_escuelas = array_column($data, 12);
+            array_shift($c_escuelas);
+            array_shift($c_escuelas); 
+
+            $c_trabajos = array_column($data, 13);
+            array_shift($c_trabajos);
+            array_shift($c_trabajos); 
+        }
+        elseif ($columnCount === 20) {
+            $c_materias = array_column($data, 17);
+            array_shift($c_materias); 
+
+            $c_escuelas = array_column($data, 11);
+            array_shift($c_escuelas); 
+
+            $c_trabajos = array_column($data, 16);
+            array_shift($c_trabajos); 
+        }
+        
+        $json_a = json_encode($c_escuelas, JSON_PRETTY_PRINT);
+        $ruta = 'json/lista_materias.json';
+        Storage::put($ruta, $json_a);
+
+        
+
+        //--------------------------materias-----------------------------
     
         // Redirigir la lógica según el número de columnas
         if ($columnCount === 17) {
-            
-            return $this->process17Columns($rows,$fechas,$columnCount);
+            return $this->process17Columns($rows,$fechas,$columnCount,$c_materias,$c_escuelas,$c_trabajos);
         } elseif ($columnCount === 20) {
-            //$this->ObtenFecha($fechas);
-            return $this->process20Columns($headers,$fechas,$columnCount);
+            return $this->process20Columns($headers,$fechas,$columnCount,$c_materias,$c_escuelas,$c_trabajos);
         } else {
             return back()->withErrors(['file' => 'Archivo no aceptado: ' . $columnCount]);
         }
     }
     
-    private function process17Columns($headers,$fechas,$columnCount)
+    private function process17Columns($headers,$fechas,$columnCount,$c_materias,$c_escuelas,$c_trabajos)
     {
         // Comparar los nombres de las columnas con los esperados
         $missingColumns = array_diff($this->expectedColumns17, $headers);
@@ -121,7 +159,7 @@ class ExcelController extends Controller
         if (!empty($missingColumns) || !empty($extraColumns)) {
             $errorMessage = 'El archivo no cumple con las columnas esperadas.';
             if (!empty($missingColumns)) {
-                $errorMessage .= ' Faltan: ' . implode(', ', $missingColumns);
+                $errorMessage .= ' Faltan columnas';
             }
             if (!empty($extraColumns)) {
                 $errorMessage .= ' Columnas adicionales: ' . implode(', ', $extraColumns);
@@ -132,10 +170,12 @@ class ExcelController extends Controller
         $columna_fecha = $this->ObtenFecha($fechas,$columnCount);
         // Si todo está bien, procesar el archivo
 
-        return back()->with('success', 'Archivo aceptado: ' . implode(', ', $columna_fecha));
+        //return back()->with('success', 'Archivo aceptado: ' . implode(', ', $columna_fecha));
+        return redirect()->route('resultados')->with('materias', $c_escuelas);
+        
     }
     
-    private function process20Columns($headers,$fechas,$columnCount)
+    private function process20Columns($headers,$fechas,$columnCount,$c_materias,$c_escuelas,$c_trabajos)
     {
         // Comparar los nombres de las columnas con los esperados
         $missingColumns = array_diff($this->expectedColumns20, $headers);
@@ -154,7 +194,9 @@ class ExcelController extends Controller
         
         $columna_fecha = $this->ObtenFecha($fechas,$columnCount);
         // Si todo está bien, procesar el archivo
-        return back()->with('success', 'Archivo aceptado: ' . implode(', ', $columna_fecha));
+        //return back()->with('success', 'Archivo aceptado: ' . implode(', ', $fechas));
+
+        return redirect()->route('resultados')->with('materias', $c_escuelas);
     }
 
     //----------------------------------------------------------------------------------------------------------------
@@ -180,7 +222,7 @@ class ExcelController extends Controller
         
         foreach($col_fecha as &$aux)
         {
-            $aux = $aux. '-' . $count;
+            $aux = $aux. $count;
             $count++; 
         }
         
