@@ -1,7 +1,7 @@
-<nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+<nav class="navbar navbar-expand-md text-white shadow-sm" style="background-color:#004A98">
     <div class="container">
-        <a class="navbar-brand" href="{{ route('dashboard') }}">
-            {{ __('Dashboard') }}
+        <a class="navbar-brand" href="{{ url('/') }}">
+            <img src="{{ asset('images/UASLP.png') }}" alt="UASLP Logo">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
             <span class="navbar-toggler-icon"></span>
@@ -17,18 +17,15 @@
             <ul class="navbar-nav ms-auto">
                 <!-- Authentication Links -->
                 <li class="nav-item dropdown">
-                    <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                    <a id="navbarDropdown" class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                         {{ Auth::user()->name }}
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                            {{ __('Profile') }}
-                        </a>
                         <a class="dropdown-item" href="{{ route('logout') }}"
                             onclick="event.preventDefault();
                                 document.getElementById('logout-form').submit();">
-                            {{ __('Log Out') }}
+                            {{ __('Salir') }}
                         </a>
 
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -40,3 +37,4 @@
         </div>
     </div>
 </nav>
+<div style="background-color:#00B2E3; width:100%; height:10px"></div>    

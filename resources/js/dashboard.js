@@ -1,76 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
-    <div class="col-1 d-flex flex-column gap-4 mx-2">
-        <a class="d-block icon-item"><img src="{{ asset('images/analytics_pie_icon.png') }}" alt="Analytics Pie"></a>
-        <a class="d-block icon-item"><img src="{{ asset('images/addData_icon.png') }}" alt="Upload file" data-bs-toggle="modal" data-bs-target="#uploadFile"></a>
-        <a class="d-block icon-item"><img src="{{ asset('images/download_icon.png') }}" alt="Download analytics"></a>
-    </div>
-    <!-- Contenido principal -->
-    <div class="container col-11 mx-auto mt-10">
-
-        <!-- Tabla para mostrar datos -->
-        <div id="tableContainer" class="mt-6 hidden">
-            <h2 class="text-xl font-bold mb-4">Datos del Excel</h2>
-            <table id="excelTable" class="min-w-full bg-white border border-gray-300">
-                <thead class="bg-gray-200"></thead>
-                <tbody></tbody>
-            </table>
-            <button id="generateGraph" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded">Generar Gráfica</button>
-            <button id="exportPdf" class="mt-4 bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded hidden">Generar Reporte PDF</button>
-        </div>
-
-        <!-- Selector de tipo de gráfico -->
-        <div class="mt-4 hidden" id="chartOptions">
-            <label for="chartType" class="font-bold">Tipo de Gráfica:</label>
-            <select id="chartType" class="border p-2 rounded">
-                <option value="bar">Barras</option>
-                <option value="line">Líneas</option>
-                <option value="pie">Pastel</option>
-            </select>
-        </div>
-
-        <!-- Contenedor de gráficos -->
-        <div id="chartsContainer" class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </div>
-
-<!-- Modal -->
-<div class="modal fade" id="uploadFile" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Carga de Información</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <!-- Formulario de carga de archivo -->
-            <div class="rounded rounded-lg shadow-lg" style="background-color: #CDCDCD">
-                <h2 class="text-xl font-bold">Subir archivo excel (.xlsx, .xlx)</h2>
-                <div class="row">
-                    <div class="justify-content-center col-md-6 d-flex">
-                        <img src="{{ asset("images/document_search.png") }}" alt="Select File" style="height: 80px">
-                    </div>
-                    <div class="col-md-6">
-                        <input id="fileInput" type="file" accept=".xlsx, .xlx" class="block w-full text-sm text-gray-600 bg-gray-50 border border-gray-300 rounded-lg cursor-pointer">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  @section('scripts')
-  
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>}
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     console.log("DOMContentLoaded");
 
     document.getElementById('fileInput').addEventListener('change', handleFile);
@@ -184,6 +112,3 @@
         });
     }
 });
-  </script>
-  @endsection
-@endsection
