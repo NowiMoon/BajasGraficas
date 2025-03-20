@@ -18,8 +18,10 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'nombre',
-        'contrasena',
+        'name',
+        'clave_usuario',
+        'user_type',
+        'password',
     ];
 
     /**
@@ -28,7 +30,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'contrasena',
+        'password',
     ];
 
     /**
@@ -39,7 +41,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'contrasena' => 'hashed',
+            'password' => 'hashed',
         ];
     }
 }
