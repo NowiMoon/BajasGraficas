@@ -23,6 +23,9 @@ class MateriaController extends Controller
         $entradasArray = explode(',', $entradas);
         $entradasArray = array_map('trim', $entradasArray);
 
+        // Obtener el valor del umbral, con 60 por defecto
+        $umbral = $request->input('umbral', 60);
+
         // Seleccionar el endpoint del microservicio Flask según el tipo seleccionado
         if ($tipo == "1") {
             // Normalización de materias
@@ -40,9 +43,12 @@ class MateriaController extends Controller
         $client = new Client();
 
         try {
-            // Enviar solicitud POST al microservicio Flask
+            // Enviar solicitud POST al microservicio Flask, incluyendo el umbral
             $response = $client->post($endpoint, [
-                'json' => ['entradas' => $entradasArray],
+                'json' => [
+                    'entradas' => $entradasArray,
+                    'umbral'   => (int)$umbral
+                ],
                 'connect_timeout' => 5,
                 'timeout' => 10,
             ]);

@@ -3,66 +3,39 @@ from fuzzywuzzy import process
 
 app = Flask(__name__)
 
-# Lista de materias y escuelas
+# Listas de datos normalizados
 materias_normalizadas = [
-    "Estructuras de Datos I",
-    "Estructuras de Datos II",
-    "Estructuras de Datos avanzadas",
-    "Programación Orientada a Objetos",
-    "Bases de Datos avanzadas",
-    "Administración de Bases de Datos",
-    "Redes de Computadoras",
-    "Sistemas Operativos",
-    "Inteligencia Artificial",
-    "Machine Learning",
-    "Ingeniería de Software",
-    "Desarrollo de Aplicaciones Web",
-    "Desarrollo de Aplicaciones Móviles",
-    "Arquitectura de Computadoras",
-    "Lenguajes de Programación",
-    "Compiladores",
-    "Cloud Computing",
-    "Matemáticas Discretas",
-    "Cálculo A",
-    "Cálculo B",
-    "Probabilidad y Estadística",
-    "Sistemas Embebidos",
-    "Robótica",
-    "Bases de Datos",
-    "Física",
-    "Proyectos computacionales I",
-    "Proyectos computacionales II",
-    "Proyectos computacionales III",
-    "Redes de Computadoras"
+    "Estructuras de Datos I", "Estructuras de Datos II", "Estructuras de Datos avanzadas",
+    "Programación Orientada a Objetos", "Bases de Datos avanzadas", "Administración de Bases de Datos",
+    "Redes de Computadoras", "Sistemas Operativos", "Inteligencia Artificial", "Machine Learning",
+    "Ingeniería de Software", "Desarrollo de Aplicaciones Web", "Desarrollo de Aplicaciones Móviles",
+    "Arquitectura de Computadoras", "Lenguajes de Programación", "Compiladores", "Cloud Computing",
+    "Matemáticas Discretas", "Cálculo A", "Cálculo B", "Probabilidad y Estadística",
+    "Sistemas Embebidos", "Robótica", "Bases de Datos", "Física", "Proyectos computacionales I",
+    "Proyectos computacionales II", "Proyectos computacionales III", "Redes de Computadoras"
 ]
-trabajos_normalizados = [
-    "BOCH",
-    "GOOGLE",
-    "HONEYHELL",
-    "DAIKIN",
-    "ABB"
-]
+
+trabajos_normalizados = ["BOCH", "GOOGLE", "HONEYHELL", "DAIKIN", "ABB"]
+
 escuelas_normalizadas = [
     "CBTIS 50", "CBTIS 119", "CBTIS 121", "CBTIS 123", "CBTIS 124", "CBTIS 125",
-    "CBTIS 126", "CBTIS 168", "CBTIS 185", "CBTIS 194", "CBTIS 195", "CBTIS 213", "CBTIS 214",
-    "CBTIS 215", "CBTIS 216", "CBTIS 217", "COBACH 01", "COBACH 02", "COBACH 03",
-    "COBACH 04", "COBACH 05", "COBACH 06", "COBACH 07", "COBACH 08", "COBACH 09",
-    "COBACH 10", "COBACH 11", "COBACH 12", "COBACH 13", "COBACH 14", "COBACH 15",
-    "Preparatoria Central", "Preparatoria Ponciano Arriaga",
-    "Preparatoria Enrique Rébsamen", "Preparatoria Marista",
-    "Preparatoria del Instituto Potosino", "PrepaTec San Luis Potosí",
-    "Preparatoria del Instituto Tecnológico de San Luis Potosí",
-    "Preparatoria del Instituto Cultural Tampico",
-    "Preparatoria del Colegio Simón Bolívar",
+    "CBTIS 126", "CBTIS 168", "CBTIS 185", "CBTIS 194", "CBTIS 195", "CBTIS 213",
+    "CBTIS 214", "CBTIS 215", "CBTIS 216", "CBTIS 217", "COBACH 01", "COBACH 02",
+    "COBACH 03", "COBACH 04", "COBACH 05", "COBACH 06", "COBACH 07", "COBACH 08",
+    "COBACH 09", "COBACH 10", "COBACH 11", "COBACH 12", "COBACH 13", "COBACH 14",
+    "COBACH 15", "Preparatoria Central", "Preparatoria Ponciano Arriaga",
+    "Preparatoria Enrique Rébsamen", "Preparatoria Marista", "Preparatoria del Instituto Potosino",
+    "PrepaTec San Luis Potosí", "Preparatoria del Instituto Tecnológico de San Luis Potosí",
+    "Preparatoria del Instituto Cultural Tampico", "Preparatoria del Colegio Simón Bolívar",
     "Preparatoria del Colegio Juana de Asbaje", "ENP (Escuela Nacional Preparatoria)",
-    "CCH (Colegio de Ciencias y Humanidades)",
-    "CECyT (Centro de Estudios Científicos y Tecnológicos)",
+    "CCH (Colegio de Ciencias y Humanidades)", "CECyT (Centro de Estudios Científicos y Tecnológicos)",
     "Preparatoria 1 - UANL", "Preparatoria 2 - UANL", "Preparatoria 3 - UANL",
     "Bachillerato de la UAQ", "Preparatoria 1 - UADY", "Preparatoria 2 - UADY",
     "Bachillerato de la UAA", "Bachillerato de la UAZ", "Bachillerato de la UG",
     "Bachillerato de la BUAP"
 ]
 
+# Función para manejo de casos específicos en materias
 def manejar_casos_especificos(entrada):
     entrada = entrada.lower().strip()
     if entrada.startswith("edo"):
@@ -99,6 +72,7 @@ def manejar_casos_especificos(entrada):
             return None, opciones_proyectos
     return None, []
 
+# Función de normalización genérica para materias
 def normalizar_materia(entrada, opciones, umbral=60):
     mejor_coincidencia_especifica, opciones_especificas = manejar_casos_especificos(entrada)
     if mejor_coincidencia_especifica:
@@ -112,9 +86,7 @@ def normalizar_materia(entrada, opciones, umbral=60):
     else:
         return None, [opcion for opcion, _ in posibles_coincidencias]
 
-
-
-
+# Funciones de normalización para escuelas y trabajos
 def normalizar_escuela(entrada, opciones, umbral=60):
     posibles_coincidencias = process.extract(entrada, opciones, limit=5)
     coincidencias_filtradas = [opcion for opcion, puntaje in posibles_coincidencias if puntaje >= umbral]
@@ -122,8 +94,6 @@ def normalizar_escuela(entrada, opciones, umbral=60):
         return coincidencias_filtradas[0], coincidencias_filtradas
     else:
         return None, [opcion for opcion, _ in posibles_coincidencias]
-
-
 
 def normalizar_trabajo(entrada, opciones, umbral=60):
     posibles_coincidencias = process.extract(entrada, opciones, limit=5)
@@ -133,17 +103,17 @@ def normalizar_trabajo(entrada, opciones, umbral=60):
     else:
         return None, [opcion for opcion, _ in posibles_coincidencias]
 
-
-
+# Endpoints con soporte al parámetro 'umbral'
 @app.route('/normalizar/materia', methods=['POST'])
 def endpoint_normalizar_materia():
     data = request.json
     entradas = data.get('entradas', [])
+    umbral = data.get('umbral', 60)
     if not entradas or not isinstance(entradas, list):
         return jsonify({'error': 'No se recibieron entradas válidas'}), 400
     resultados = []
     for entrada in entradas:
-        mejor_coincidencia, opciones = normalizar_materia(entrada, materias_normalizadas)
+        mejor_coincidencia, opciones = normalizar_materia(entrada, materias_normalizadas, umbral)
         resultados.append({
             'entrada': entrada,
             'mejor_coincidencia': mejor_coincidencia,
@@ -155,11 +125,12 @@ def endpoint_normalizar_materia():
 def endpoint_normalizar_escuela():
     data = request.json
     entradas = data.get('entradas', [])
+    umbral = data.get('umbral', 60)
     if not entradas or not isinstance(entradas, list):
         return jsonify({'error': 'No se recibieron entradas válidas'}), 400
     resultados = []
     for entrada in entradas:
-        mejor_coincidencia, opciones = normalizar_escuela(entrada, escuelas_normalizadas)
+        mejor_coincidencia, opciones = normalizar_escuela(entrada, escuelas_normalizadas, umbral)
         resultados.append({
             'entrada': entrada,
             'mejor_coincidencia': mejor_coincidencia,
@@ -167,24 +138,21 @@ def endpoint_normalizar_escuela():
         })
     return jsonify({'resultados': resultados})
 
-
 @app.route('/normalizar/trabajos', methods=['POST'])
 def endpoint_normalizar_trabajos():
     data = request.json
     entradas = data.get('entradas', [])
-    
+    umbral = data.get('umbral', 60)
     if not entradas or not isinstance(entradas, list):
         return jsonify({'error': 'No se recibieron entradas válidas'}), 400
-
     resultados = []
     for entrada in entradas:
-        mejor_coincidencia, opciones = normalizar_trabajo(entrada, trabajos_normalizados)
+        mejor_coincidencia, opciones = normalizar_trabajo(entrada, trabajos_normalizados, umbral)
         resultados.append({
             'entrada': entrada,
             'mejor_coincidencia': mejor_coincidencia,
             'opciones': opciones[:3]
         })
-
     return jsonify({'resultados': resultados})
 
 if __name__ == '__main__':
