@@ -16,24 +16,11 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+            max-width: 700px;
             margin: auto;
         }
         h1 {
             color: #333;
-        }
-        label {
-            font-weight: bold;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        select {
-            height: 100px;
         }
         .entry {
             padding: 15px;
@@ -60,6 +47,16 @@
         button:hover {
             background-color: #0056b3;
         }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        select {
+            height: 100px;
+        }
     </style>
 </head>
 <body>
@@ -75,14 +72,22 @@
                     <p><strong>{{ $resultado['entrada'] }}</strong></p>
 
                     <label>Mejor Coincidencia:</label>
-                    <input type="text" value="{{ $resultado['mejor_coincidencia'] }}" readonly>
+                    <input id="mejor_coincidencia_{{ $loop->index }}" type="text" value="{{ $resultado['mejor_coincidencia'] ?: 'N/A' }}" readonly>
 
                     <label>Opciones Similares:</label>
-                    <select size="3">
-                        @foreach($resultado['opciones'] as $opcion)
-                            <option>{{ $opcion }}</option>
-                        @endforeach
+                    <select size="3" onchange="updateCoincidencia('{{ $loop->index }}')">
+                        @if(!empty($resultado['opciones']))
+                            @foreach($resultado['opciones'] as $opcion)
+                                <option>{{ $opcion }}</option>
+                            @endforeach
+                        @else
+                            <option>N/A</option>
+                        @endif
                     </select>
+
+                    <label>Agregar Corrección Manual:</label>
+                    <input id="correccion_manual_{{ $loop->index }}" type="text" placeholder="Escribe la corrección manual aquí...">
+                    <button onclick="updateCorreccion('{{ $loop->index }}')">Sustituir por Corrección Manual</button>
                 </div>
             @endforeach
         @endif
@@ -91,6 +96,22 @@
             <button onclick="window.history.back()">Volver</button>
         </div>
     </div>
+
+    <script>
+        // Actualizar el campo de Mejor Coincidencia con la opción seleccionada
+        function updateCoincidencia(index) {
+            var select = document.querySelector(`#mejor_coincidencia_${index}`);
+            var selectedOption = document.querySelector(`#mejor_coincidencia_${index}`).parentNode.querySelectorAll("select")[0].value;
+            select.value = selectedOption;
+        }
+
+        // Sustituir el valor del campo de Mejor Coincidencia con la corrección manual
+        function updateCorreccion(index) {
+            var manualCorreccion = document.querySelector(`#correccion_manual_${index}`).value;
+            if (manualCorreccion) {
+                document.querySelector(`#mejor_coincidencia_${index}`).value = manualCorreccion;
+            }
+        }
+    </script>
 </body>
 </html>
-
