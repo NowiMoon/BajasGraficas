@@ -1,27 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="col-1 d-flex flex-column gap-4 mx-2">
-        <a class="d-block icon-item"><img src="{{ asset('images/analytics_pie_icon.png') }}" alt="Analytics Pie"></a>
-        <a class="d-block icon-item"><img src="{{ asset('images/addData_icon.png') }}" alt="Upload file" data-bs-toggle="modal" data-bs-target="#uploadFile"></a>
-        <a class="d-block icon-item"><img src="{{ asset('images/download_icon.png') }}" alt="Download analytics"></a>
+<div class="d-flex my-0 py-0">
+    <!-- Sidebar -->
+    <div class="d-flex flex-column bg-secondary bg-opacity-10 vh-100 align-items-center justify-content-evenly" style="width: 80px; z-index: 1000;">
+        <a class="d-block icon-item"><img src="{{ asset('images/analytics_pie_icon.svg') }}" alt="Analytics Pie"></a>
+        <a class="d-block icon-item"><img src="{{ asset('images/addData_icon.svg') }}" alt="Upload file" data-bs-toggle="modal" data-bs-target="#uploadFile"></a>
+        <a class="d-block icon-item"><img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics"></a>
     </div>
-    <!-- Contenido principal -->
-    <div class="container col-11 mx-auto mt-10">
 
+    <!-- Contenido principal -->
+    <div class="container flex-grow-1 col-11 mx-auto mt-10">
         <!-- Tabla para mostrar datos -->
-        <div id="tableContainer" class="mt-6 hidden">
+        <div id="tableContainer" class="mt-6 d-none">
             <h2 class="text-xl font-bold mb-4">Datos del Excel</h2>
             <table id="excelTable" class="min-w-full bg-white border border-gray-300">
                 <thead class="bg-gray-200"></thead>
                 <tbody></tbody>
             </table>
             <button id="generateGraph" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded">Generar Gráfica</button>
-            <button id="exportPdf" class="mt-4 bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded hidden">Generar Reporte PDF</button>
+            <button id="exportPdf" class="mt-4 bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded">Generar Reporte PDF</button>
         </div>
 
         <!-- Selector de tipo de gráfico -->
-        <div class="mt-4 hidden" id="chartOptions">
+        <div class="mt-4 d-none" id="chartOptions">
             <label for="chartType" class="font-bold">Tipo de Gráfica:</label>
             <select id="chartType" class="border p-2 rounded">
                 <option value="bar">Barras</option>
@@ -33,6 +35,8 @@
         <!-- Contenedor de gráficos -->
         <div id="chartsContainer" class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
+</div>
+
 
 <!-- Modal -->
 <div class="modal fade" id="uploadFile" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -43,15 +47,38 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+
           <!-- Formulario de carga de archivo -->
             <div class="rounded rounded-lg shadow-lg" style="background-color: #CDCDCD">
                 <h2 class="text-xl font-bold">Subir archivo excel (.xlsx, .xlx)</h2>
                 <div class="row">
+
                     <div class="justify-content-center col-md-6 d-flex">
                         <img src="{{ asset("images/document_search.png") }}" alt="Select File" style="height: 80px">
                     </div>
+
                     <div class="col-md-6">
-                        <input id="fileInput" type="file" accept=".xlsx, .xlx" class="block w-full text-sm text-gray-600 bg-gray-50 border border-gray-300 rounded-lg cursor-pointer">
+                        <!--   subir archivo    -->
+                        @if($errors->any())
+                            <div style="color: red;">
+                                <ul>
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <!-- Formulario para subir el archivo -->
+                        <form action="{{ route('upload') }}" method="post" enctype="multipart/form-data">
+                            @csrf <!-- Token de seguridad de Laravel -->
+                            <label for="file">Selecciona un archivo .xlsx:</label>
+                            <input type="file" id="file" name="file" accept=".xlsx" required>
+                            <br><br>
+                            <button type="submit">Subir Archivo</button>
+                        </form>
+                        
+                        <!--   subir archivo    -->
                     </div>
                 </div>
             </div>
@@ -68,12 +95,12 @@
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
     console.log("DOMContentLoaded");
 
-    document.getElementById('fileInput').addEventListener('change', handleFile);
+    document.getElementById('file').addEventListener('change', handleFile);
     document.getElementById('generateGraph').addEventListener('click', generateCharts);
     document.getElementById('exportPdf').addEventListener('click', exportToPdf);
 
@@ -125,9 +152,10 @@
             });
             tbody.appendChild(row);
         });
-        document.getElementById('tableContainer').classList.remove('hidden');
-        document.getElementById('chartOptions').classList.remove('hidden');
-        document.getElementById('exportPdf').classList.remove('hidden');
+        document.getElementById('tableContainer').classList.remove('d-none');
+        document.getElementById('generateCharts').classList.remove('d-none');
+        document.getElementById('chartOptions').classList.remove('d-none');
+        document.getElementById('exportPdf').classList.remove('d-none');
     }
 
     function exportToPdf() {

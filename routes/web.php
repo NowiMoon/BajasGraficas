@@ -3,14 +3,18 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ExcelController;
+use App\Http\Controllers\MateriaController;
+use App\Http\Controllers\RecibirJsonController;
 
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
+/*
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');*/
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -20,10 +24,61 @@ Route::middleware('auth')->group(function () {
 
 Route::group(['middleware' => ['auth', 'admin']], function () {
     // Rutas de administrador aquí
-    Route::get('register', [RegisteredUserController::class, 'create'])
-    ->name('register');
-
-Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::get('/dashboard', function () {
+        return redirect()->route('register');
+    })->name('dashboard');
+    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('register', [RegisteredUserController::class, 'store']);
 });
+
+
+// Rutas del Coordinador
+Route::group(['middleware' => ['auth', 'coordinador']], function () {
+    // Ruta pantalla inicial
+    Route::get('/', function () {
+        return view('dashboard');
+    })->name('dashboard');
+    //Ruta vista Gestion de materias
+    Route::get('gestion_materias', function () {
+        return view('gestion_materias');
+    })->name('gestion_materias');
+
+
+    Route::post('gestion_materias', [MateriaController::class,'store'])->name('gestion_materias.store');
+    Route::post('/upload_subjects', [ExcelController::class, 'uploadSubjects'])->name('upload_subjects');
+});
+
+Route::get('/ayuda', function () {
+    return view('resultado');
+});
+
+
+/******************************************************************************************************************************************************************************/
+
+Route::get('/upload-form', function () {
+    return view('upload-excel'); 
+});
+
+
+//------------------------------------------------------------------------------------------------------------
+Route::get('/ayuda', function () {
+    return view('dashboard');
+});
+
+Route::post('/upload', [ExcelController::class, 'upload'])->name('upload');
+Route::get('/upload-form', function () {
+    return view('dashboard');
+});
+
+Route::get('/recibir-json', [RecibirJsonController::class, 'recibirJson'])->name('recibirJson');
+
+//Route::get('/enviando/{columna_fecha}', [ExcelController::class, 'enviarDatos'])->name('enviarDatos');
+//Route::get('/recibir/{data}', [RecibirJsonController::class, 'recibirJson'])->name('recibirJson');
+
+//Route::get('/enviar-lista/{DATOS}', [ExcelController::class, 'enviarLista']);
+//Route::post('/recibir-lista', [RecibirJsonController::class, 'recibirJson']);
+
+Route::get('/enviar', [ExcelController::class, 'enviarLista']);
+Route::get('/recibir', [RecibirJsonController::class, 'recibirJson'])->name('recibirJson');
 
 require __DIR__.'/auth.php';

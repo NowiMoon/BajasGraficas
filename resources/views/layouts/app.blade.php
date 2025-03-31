@@ -21,10 +21,15 @@
 <body>
     <div id="app">
         @include('layouts.navigation')
-
-        <main class="py-4">
-            @yield('content')
-        </main>
+        
+        <div class="d-flex">
+            <!-- Main content -->
+            <div class="flex-grow-1" style="">
+                <main class="py-0">
+                    @yield('content')
+                </main>
+            </div>
+        </div>
     </div>
 
     @yield('scripts')

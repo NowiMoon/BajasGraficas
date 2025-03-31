@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('materias', function (Blueprint $table) {
             $table->id();
-            $table->string('Clave_materia')->unique();
-            $table->string('Nombre_materia', 30);
+            $table->string('clave_materia')->unique();
+            $table->string('nombre_materia', 100);
             $table->timestamps();
         });
     }

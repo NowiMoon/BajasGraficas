@@ -1,7 +1,7 @@
-@extends('layouts.guest')
+@extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container pt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
@@ -81,9 +81,6 @@
 
                         <div class="row mb-0">
                             <div class="col-md-8 offset-md-4">
-                                <a class="btn btn-link" href="{{ route('login') }}">
-                                    {{ __('Already registered?') }}
-                                </a>
                                 <button type="submit" class="btn btn-primary">
                                     {{ __('Register') }}
                                 </button>
