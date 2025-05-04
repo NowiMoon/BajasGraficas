@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Materia;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Storage;
@@ -56,11 +55,6 @@ class ExcelController extends Controller
         'Materia Difícil 3'
     ];
 
-    private static $subjectColumns = [
-        "clave_c",
-        "nombre_c",
-    ];
-
     public $c_id_anio = [];
     public $c_anio_baja = []; //-----------------------------------
     public $c_clave = [];
@@ -73,6 +67,8 @@ class ExcelController extends Controller
     public $c_baja = [];
     public $c_inconveniente = [];
     public $c_trabajos = [];
+    public $c_titulacion = [];
+    public $c_fecha_egel = [];
 
     public $DATOS = [];
 
@@ -80,11 +76,13 @@ class ExcelController extends Controller
     {
         // Validamos que se haya subido un archivo
         $request->validate([
-            'file' => 'required|mimes:xlsx|max:2048', // Solo archivos .xlsx de máximo 2MB
+            'file' => 'required|file|max:2048', // Solo verifica que sea un archivo (no el tipo)
         ]);
         //dd('El método upload se está ejecutando.');
         // Obtenemos el archivo subido
         $file = $request->file('file');
+
+        $umbral = $request->input('umbral', 60);
     
         // Cargar el archivo usando PhpSpreadsheet
         $spreadsheet = IOFactory::load($file->getPathname());
@@ -114,6 +112,13 @@ class ExcelController extends Controller
     
         // Contar el número de columnas
         $columnCount = count($headers);
+        //dd($columnCount);
+
+        if($columnCount != 17 & $columnCount != 20)
+        {
+            return back()->withErrors(['file' => 'Archivo no aceptado: ' . 'no cuenta con las columnas esperadas']);
+        }
+        
 
         //--------------------------datos basura-----------------------------
         if($columnCount === 17)
@@ -128,6 +133,7 @@ class ExcelController extends Controller
             $c_baja = array_column($data, 9);
             $c_inconveniente = array_column($data, 14);
             $c_trabajos = array_column($data, 13);
+            $c_titulacion = array_column($data, 15);
 
             for ($i = 0; $i < 2; $i++) {
                 array_shift($c_clave);
@@ -140,6 +146,7 @@ class ExcelController extends Controller
                 array_shift($c_baja);
                 array_shift($c_inconveniente);
                 array_shift($c_trabajos);
+                array_shift($c_titulacion);
             }
  
         }
@@ -168,11 +175,14 @@ class ExcelController extends Controller
             $c_baja = array_column($data, 12);
             array_shift($c_baja); 
 
-            $c_baja = array_column($data, 13);
-            array_shift($c_baja); 
+            $c_inconveniente = array_column($data, 13);
+            array_shift($c_inconveniente); 
 
             $c_trabajos = array_column($data, 16);
             array_shift($c_trabajos); 
+
+            $c_titulacion = array_column($data, 14);
+            array_shift($c_titulacion); 
         }
 
         $c_id_anio = $this->ObtenFecha($fechas,$columnCount);
@@ -186,21 +196,23 @@ class ExcelController extends Controller
         $DATOS[] = $c_materias;
         $DATOS[] = $c_escuelas;
         $DATOS[] = $c_baja;
-        //$DATOS[] = $c_inconveniente;
+        $DATOS[] = $c_inconveniente;
         $DATOS[] = $c_trabajos;
+        $DATOS[] = $c_titulacion;
 
         //--------------------------materias-----------------------------
+
         // Redirigir la lógica según el número de columnas
         if ($columnCount === 17) {
-            return $this->process17Columns($rows,$DATOS); 
+            return $this->process17Columns($rows,$DATOS,$umbral);
         } elseif ($columnCount === 20) {
-           return $this->process20Columns($headers,$DATOS);
+           return $this->process20Columns($headers,$DATOS,$umbral);
         } else {
             return back()->withErrors(['file' => 'Archivo no aceptado: ' . $columnCount]);
         }
     }
     
-    private function process17Columns($headers,$DATOS)
+    private function process17Columns($headers,$DATOS,$umbral)
     {
         // Comparar los nombres de las columnas con los esperados
         $missingColumns = array_diff($this->expectedColumns17, $headers);
@@ -215,10 +227,10 @@ class ExcelController extends Controller
         $rutaArchivo = 'json/lista.json';
         Storage::put($rutaArchivo, $json);
  
-        return redirect()->route('recibirJson');
+        return app('App\Http\Controllers\RecibirJsonController')->recibirJson($umbral);
     }
     
-    private function process20Columns($headers,$DATOS)
+    private function process20Columns($headers,$DATOS,$umbral)
     {
         // Comparar los nombres de las columnas con los esperados
         $missingColumns = array_diff($this->expectedColumns20, $headers);
@@ -233,7 +245,7 @@ class ExcelController extends Controller
         $rutaArchivo = 'json/lista.json';
         Storage::put($rutaArchivo, $json);
  
-        return redirect()->route('recibirJson');
+        return app('App\Http\Controllers\RecibirJsonController')->recibirJson($umbral);
     }
 
     //----------------------------------------------------------------------------------------------------------------
@@ -268,46 +280,5 @@ class ExcelController extends Controller
         Storage::put($rutaArchivo, $json);
 
         return $col_fecha;
-    }
-
-    public function uploadSubjects(Request $request){
-        $request->validate([
-            'file' => 'required|mimes:csv|max:2048', // Solo archivos .xlsx de máximo 2MB
-        ]);
-
-        $file = $request->file('file');
-
-        $spreadsheet = IOFactory::load($file->getPathname());
-        $sheet = $spreadsheet->getActiveSheet();
-
-        $data = $sheet->toArray();
-        $columnas = count($data[0]);
-        
-
-        if ($columnas != 2){
-            dd($columnas);
-            return back()->withErrors(['file' => 'Archivo no aceptado: '. $columnas]);
-        }
-
-        $duplicados = 0;
-        $insertados = 0;
-
-        foreach ($data as $index => $row) {
-            if ($index == 0) continue;
-
-            $clave_materia = trim($row[0]);
-            $nombre_materia = trim($row[1]);
-
-            if (Materia::where('clave_materia', $clave_materia)->exists()) {
-                $duplicados++;
-            }else {
-                $materia = new Materia;
-                $materia->clave_materia = $clave_materia;
-                $materia->nombre_materia = $nombre_materia;
-                $materia->save();
-                $insertados++;
-            }
-        }
-        return back()->with('success', "Importación completada. Insertados: $insertados, Duplicados: $duplicados.");
     }
 }

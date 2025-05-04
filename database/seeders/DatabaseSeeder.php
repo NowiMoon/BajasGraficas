@@ -17,9 +17,9 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'name' => 'Jose Luis',
-            'clave_usuario' => 322754,
-            'user_type' => 3,
-            'password' => bcrypt('12345678'),
+            'clave_usuario' => 123,
+            'user_type' => 2,
+            'password' => bcrypt('123'),
             'status' => true,
         ]);
     }

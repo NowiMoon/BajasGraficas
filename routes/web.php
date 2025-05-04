@@ -11,10 +11,10 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-/*
+
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');*/
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -55,15 +55,6 @@ Route::get('/ayuda', function () {
 
 /******************************************************************************************************************************************************************************/
 
-Route::get('/upload-form', function () {
-    return view('upload-excel'); 
-});
-
-
-//------------------------------------------------------------------------------------------------------------
-Route::get('/ayuda', function () {
-    return view('dashboard');
-});
 
 Route::post('/upload', [ExcelController::class, 'upload'])->name('upload');
 Route::get('/upload-form', function () {

@@ -1,5 +1,11 @@
 @extends('layouts.app')
+@section('content')
+<!-- Navbar UASLP (MOVIDO ARRIBA DE TODO) -->
 
+
+
+
+</nav>
 @section('content')
 <div class="d-flex my-0 py-0">
     <!-- Sidebar -->
@@ -11,34 +17,17 @@
 
     <!-- Contenido principal -->
     <div class="container flex-grow-1 col-11 mx-auto mt-10">
+        <!-- Contenedor para mensajes AJAX -->
+        <div id="ajaxMessages" class="mt-3"></div>
+
         <!-- Tabla para mostrar datos -->
         <div id="tableContainer" class="mt-6 d-none">
-            <h2 class="text-xl font-bold mb-4">Datos del Excel</h2>
-            <table id="excelTable" class="min-w-full bg-white border border-gray-300">
-                <thead class="bg-gray-200"></thead>
-                <tbody></tbody>
-            </table>
-            <button id="generateGraph" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded">Generar Gráfica</button>
-            <button id="exportPdf" class="mt-4 bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded">Generar Reporte PDF</button>
+            <!-- ... (mantén tu contenido actual de la tabla) ... -->
         </div>
-
-        <!-- Selector de tipo de gráfico -->
-        <div class="mt-4 d-none" id="chartOptions">
-            <label for="chartType" class="font-bold">Tipo de Gráfica:</label>
-            <select id="chartType" class="border p-2 rounded">
-                <option value="bar">Barras</option>
-                <option value="line">Líneas</option>
-                <option value="pie">Pastel</option>
-            </select>
-        </div>
-
-        <!-- Contenedor de gráficos -->
-        <div id="chartsContainer" class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
 </div>
 
-
-<!-- Modal -->
+<!-- Modal de carga -->
 <div class="modal fade" id="uploadFile" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -47,171 +36,233 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+            <div id="modalMessages"></div>
 
-          <!-- Formulario de carga de archivo -->
-            <div class="rounded rounded-lg shadow-lg" style="background-color: #CDCDCD">
-                <h2 class="text-xl font-bold">Subir archivo excel (.xlsx, .xlx)</h2>
-                <div class="row">
-
-                    <div class="justify-content-center col-md-6 d-flex">
-                        <img src="{{ asset("images/document_search.png") }}" alt="Select File" style="height: 80px">
+            <div class="rounded-lg shadow-lg p-4" style="background-color: #ffffff; border: 1px solid #e2e8f0;">
+                <h2 class="text-center mb-6" style="color: #2c3e50; font-size: 1.5rem; font-weight: 600; letter-spacing: 0.5px; padding: 0.5rem 0; border-bottom: 2px solid #3490dc; display: inline-block; margin: 0 auto 1.5rem; display: block;">SUBIR ARCHIVO EXCEL (.XLSX, .XLX)</h2>
+                
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center">
+                        <img src="{{ asset('images/document_search.png') }}" alt="Select File" style="height: 120px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
                     </div>
 
                     <div class="col-md-6">
-                        <!--   subir archivo    -->
-                        @if($errors->any())
-                            <div style="color: red;">
-                                <ul>
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
+                        <form id="ajaxUploadForm" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="mb-4">
+                                <label for="file" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #4a5568;">Selecciona un archivo .xlsx:</label>
+                                <div style="position: relative;">
+                                    <input type="file" id="file" name="file" accept=".xlsx" required 
+                                           style="width: 100%; padding: 0.75rem; font-size: 1rem; color: #4a5568; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.375rem; transition: all 0.2s ease;"
+                                           onchange="document.getElementById('file-name').textContent = this.files[0].name">
+                                    <div id="file-name" style="margin-top: 0.5rem; font-size: 0.875rem; color: #718096;"></div>
+                                </div>
                             </div>
-                        @endif
 
-                        <!-- Formulario para subir el archivo -->
-                        <form action="{{ route('upload') }}" method="post" enctype="multipart/form-data">
-                            @csrf <!-- Token de seguridad de Laravel -->
-                            <label for="file">Selecciona un archivo .xlsx:</label>
-                            <input type="file" id="file" name="file" accept=".xlsx" required>
-                            <br><br>
-                            <button type="submit">Subir Archivo</button>
+                            <!-- Control de umbral mejorado -->
+                            <div class="mb-4" style="position: relative;">
+                                <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                                    <label for="umbral" style="font-weight: 500; color: #4a5568; margin-right: 0.5rem;">Umbral de similitud:</label>
+                                    <span id="valorUmbral" style="font-weight: 600; color: #3490dc;">60%</span>
+                                    <!-- Botón de información -->
+                                    <button type="button" id="infoUmbralBtn" class="btn btn-sm btn-link p-0 ms-2" style="color: #6c757d;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                            <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <input type="range" id="umbral" name="umbral" min="1" max="100" value="60" oninput="document.getElementById('valorUmbral').textContent = this.value + '%'" 
+                                       style="width: 100%; height: 6px; border-radius: 3px; background: #e2e8f0; outline: none; appearance: none;">
+                                <div style="display: flex; justify-content: space-between; margin-top: 0.25rem;">
+                                    <small style="color: #718096;">Bajo</small>
+                                    <small style="color: #718096;">Alto</small>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="submitBtn" style="background-color: #3490dc; color: white; border: none; padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 500; border-radius: 0.375rem; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <svg xmlns="http://www.w3.org/2000/svg" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                Subir Archivo
+                            </button>
                         </form>
-                        
-                        <!--   subir archivo    -->
                     </div>
                 </div>
             </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          <button type="button" class="btn btn-primary">Guardar Cambios</button>
         </div>
       </div>
     </div>
-  </div>
+</div>
 
-  @section('scripts')
-  
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-    console.log("DOMContentLoaded");
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- SweetAlert2 para popups bonitos -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    document.getElementById('file').addEventListener('change', handleFile);
-    document.getElementById('generateGraph').addEventListener('click', generateCharts);
-    document.getElementById('exportPdf').addEventListener('click', exportToPdf);
-
-    function handleFile(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
-            displayTable(jsonData);
-        };
-        reader.readAsArrayBuffer(file);
-    }
-
-    function displayTable(data) {
-        const table = document.getElementById('excelTable');
-        const thead = table.querySelector('thead');
-        const tbody = table.querySelector('tbody');
-        thead.innerHTML = '';
-        tbody.innerHTML = '';
-
-        if (data.length === 0) {
-            alert('El archivo Excel está vacío.');
-            return;
-        }
-
-        const headerRow = document.createElement('tr');
-        data[0].forEach(header => {
-            const th = document.createElement('th');
-            th.textContent = header || 'Columna';
-            th.classList.add('border', 'p-2', 'bg-gray-200');
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-
-        data.slice(1).forEach(rowData => {
-            const row = document.createElement('tr');
-            rowData.forEach(cell => {
-                const td = document.createElement('td');
-                td.textContent = cell;
-                td.contentEditable = true;
-                td.classList.add('border', 'p-2');
-                row.appendChild(td);
-            });
-            tbody.appendChild(row);
-        });
-        document.getElementById('tableContainer').classList.remove('d-none');
-        document.getElementById('generateCharts').classList.remove('d-none');
-        document.getElementById('chartOptions').classList.remove('d-none');
-        document.getElementById('exportPdf').classList.remove('d-none');
-    }
-
-    function exportToPdf() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.text("Reporte de Datos y Gráficas", 10, 10);
-        doc.save("reporte.pdf");
-    }
-
-    function generateCharts() {
-        const table = document.getElementById('excelTable');
-        const rows = table.querySelectorAll('tbody tr');
-        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent);
-
-        let data = [];
-        rows.forEach(row => {
-            const cells = row.querySelectorAll('td');
-            let rowData = {};
-            cells.forEach((cell, index) => {
-                rowData[headers[index]] = cell.textContent;
-            });
-            data.push(rowData);
-        });
-
-        const labels = data.map(row => row[headers[0]]);
-        const values = data.map(row => parseFloat(row[headers[1]]) || 0);
-        const chartType = document.getElementById('chartType').value;
-
-        const container = document.getElementById('chartsContainer');
-        container.innerHTML = '';
-
-        const canvas = document.createElement('canvas');
-        container.appendChild(canvas);
-
-        new Chart(canvas.getContext('2d'), {
-            type: chartType,
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: headers[1],
-                    data: values,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'top' },
-                    title: { display: true, text: `Gráfico de ${headers[1]}` }
-                }
-            }
-        });
+<script>
+// Configuración de AJAX para CSRF token
+$.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
     }
 });
-  </script>
-  @endsection
+
+$(document).ready(function() {
+    // Explicación del umbral con SweetAlert2
+    $('#infoUmbralBtn').click(function() {
+        Swal.fire({
+            title: 'Umbral de Similitud',
+            html: `
+                <div class="text-start">
+                    <p>El umbral determina qué tan estricto es el sistema al buscar coincidencias:</p>
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-danger me-3" style="width: 80px;">1-40%</span>
+                        <span>Más resultados, menos precisión</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-warning me-3" style="width: 80px;">40-70%</span>
+                        <span>Balance recomendado (valor actual: <strong>${$('#umbral').val()}%</strong>)</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-success me-3" style="width: 80px;">70-100%</span>
+                        <span>Menos resultados, máxima precisión</span>
+                    </div>
+                    <p class="mt-3"><i class="fas fa-lightbulb text-warning"></i> <em>Sugerencia: Comienza con 60% y ajusta según los resultados obtenidos.</em></p>
+                </div>
+            `,
+            icon: 'info',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#3490dc',
+            width: '600px'
+        });
+    });
+
+    // AJAX para subir archivo (tu código existente)
+    $('#ajaxUploadForm').on('submit', function(e) {
+        e.preventDefault();
+
+        $('#submitBtn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...');
+        $('#submitBtn').prop('disabled', true);
+        $('#modalMessages').html('');
+
+        let formData = new FormData(this);
+        formData.append('umbral', $('#umbral').val());
+
+        $.ajax({
+            url: "{{ route('upload') }}",
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    $('#modalMessages').html(`
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            ${response.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `);
+
+                    let resultadosHTML = `
+                        <div class="mt-4">
+                            <h5>Sugerencias encontradas:</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Entrada</th>
+                                            <th>Mejor coincidencia</th>
+                                            <th>Opciones sugeridas</th>
+                                            <th>Corrección manual</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                    `;
+
+                    response.data.forEach(item => {
+                        item.resultados.forEach(res => {
+                            let sugerencias = '';
+                            if (res.opciones && res.opciones.length > 0) {
+                                res.opciones.forEach(opcion => {
+                                    sugerencias += `<div class="mb-1"><span class="badge bg-primary">${opcion}</span></div>`;
+                                });
+                            } else {
+                                sugerencias = '<em>Sin sugerencias</em>';
+                            }
+
+                            resultadosHTML += `
+                                <tr>
+                                    <td>${res.entrada}</td>
+                                    <td>${res.mejor_coincidencia ?? '<em>No encontrada</em>'}</td>
+                                    <td>${sugerencias}</td>
+                                    <td>
+                                        <input type="text" class="form-control" placeholder="Escribe tu corrección">
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    });
+
+                    resultadosHTML += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+
+                    $('#modalMessages').append(resultadosHTML);
+
+                    setTimeout(() => {
+                        $('#uploadFile').modal('hide');
+                        $('#ajaxMessages').html(`
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                ${response.message}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        `);
+                    }, 3000);
+                } else {
+                    $('#modalMessages').html(`
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Error:</strong> ${response.message}
+                            ${response.error ? '<br>' + response.error : ''}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `);
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Ocurrió un error al procesar el archivo';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                $('#modalMessages').html(`
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Error:</strong> ${errorMessage}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `);
+            },
+            complete: function() {
+                $('#submitBtn').html(`
+                    <svg xmlns="http://www.w3.org/2000/svg" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    Subir Archivo
+                `);
+                $('#submitBtn').prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
+@endsection
 @endsection

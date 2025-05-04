@@ -4,54 +4,139 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class RecibirJsonController extends Controller
 {
-    public function recibirJson()
+    public function recibirJson($umbral)
     {
-        $rutaArchivo = 'json/lista.json';
-    
-        if (Storage::exists($rutaArchivo)) {
+        try {
+            $Datos_Nuevos = [];
+            $rutaArchivo = 'json/lista.json';
+
+            if (!Storage::exists($rutaArchivo)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Archivo lista.json no encontrado'
+                ], 404);
+            }
+
             $json = Storage::get($rutaArchivo);
             $datos = json_decode($json, true);
-        }
 
-        if (isset($datos[0])) {
+            if (!isset($datos[0])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Datos en formato incorrecto'
+                ], 400);
+            }
+
             $lista_deseada = $datos[0];
-        }
+            $aux_id_anio = [20251, 20253];
+            $cont = 0;
 
-        //Verifica datos ya guardados
-        $aux_id_anio = [20251, 0];
-        $cont = 0;
-
-        for ($i = 0; $i < count($lista_deseada); $i++) {
-            for($j = 0; $j < count($aux_id_anio); $j++)
-            {
-                if($lista_deseada[$i] == $aux_id_anio[$j])
-                {
-                    array_splice($lista_deseada, $i, 1);
-                    for($k = 0; $k < count($datos); $k++)
-                    {
-                        $list_aux = $datos[$k];
-                        array_splice($list_aux, $i, 1);
-                        $datos[$k] = $list_aux;
-                        //dd($list_aux);
+            for ($i = 0; $i < count($lista_deseada); $i++) {
+                for($j = 0; $j < count($aux_id_anio); $j++) {
+                    if($lista_deseada[$i] == $aux_id_anio[$j]) {
+                        array_splice($lista_deseada, $i, 1);
+                        for($k = 0; $k < count($datos); $k++) {
+                            $list_aux = $datos[$k];
+                            array_splice($list_aux, $i, 1);
+                            $datos[$k] = $list_aux;
+                        }
+                        $cont++;
+                        $i--;
+                        break;
                     }
-
-                    $cont = $cont + 1;
-                    $i = $i - 1;
-                    break;
                 }
             }
-            
+
+            $json = json_encode($datos, JSON_PRETTY_PRINT);
+            $ruta = 'json/lista_sin_duplicados.json';
+            Storage::put($ruta, $json);
+
+            $mi_valor = 'Se ingresaron: ' . count($lista_deseada) . ' registros nuevos de ' . $cont;
+
+            if (!Storage::exists($ruta)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al crear archivo sin duplicados'
+                ], 500);
+            }
+
+            $json = Storage::get($ruta);
+            $datos = json_decode($json, true);
+
+            $entradas_Materias = $datos[6] ?? [];
+            $entradas_Escuelas = $datos[7] ?? [];
+            $entradas_Trabajos = $datos[9] ?? [];
+
+            for($tipo = 1; $tipo < 4; $tipo++) {
+                $mController = new MateriaController();
+                $datosRequest = ['umbral' => $umbral];
+
+                switch($tipo) {
+                    case 1:
+                        $datosRequest['datos'] = $entradas_Materias;
+                        $datosRequest['tipo'] = $tipo;
+                        break;
+                    case 2:
+                        $datosRequest['datos'] = $entradas_Escuelas;
+                        $datosRequest['tipo'] = $tipo;
+                        break;
+                    case 3:
+                        $datosRequest['datos'] = $entradas_Trabajos;
+                        $datosRequest['tipo'] = $tipo;
+                        break;
+                }
+
+                $request = new Request($datosRequest);
+                $response = $mController->normalizar_datos($request);
+                
+                if (!$response->getData()->success) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error en normalización de datos',
+                        'details' => $response->getData()
+                    ], 500);
+                }
+
+                $Datos_Nuevos[] = $response->getData()->resultado;
+            }
+
+            return $this->guardar_datos($Datos_Nuevos);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error en el servidor',
+                'error' => $e->getMessage()
+            ], 500);
         }
+    }
 
-        $json = json_encode($datos, JSON_PRETTY_PRINT);
-        $ruta = 'json/lista_sin_duplicados.json';
-        Storage::put($ruta, $json);
+    private function guardar_datos($Datos)
+    {
+        try {
+            $json = json_encode($Datos, JSON_PRETTY_PRINT);
+            $ruta = 'json/ejemplo.json';
+            
+            if (!Storage::put($ruta, $json)) {
+                throw new \Exception("Error al guardar los datos");
+            }
 
-        $mi_valor = 'Se ingresaron: ' . count($lista_deseada) . ' registros nuevos de ' . $cont;
-        
-        return view('resultados', ['valor' => $mi_valor]); 
+            return response()->json([
+                'success' => true,
+                'message' => 'Archivo aceptado y procesado correctamente',
+                'data' => $Datos
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar los datos',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

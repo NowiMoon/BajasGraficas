@@ -20,6 +20,6 @@ class AdminMiddleware
             return $next($request);
         }
 
-        return redirect('/')->with('error', 'No tienes permisos de administrador');
+        return redirect('/login')->with('error', 'No tienes permisos de administrador');
     }
 }
