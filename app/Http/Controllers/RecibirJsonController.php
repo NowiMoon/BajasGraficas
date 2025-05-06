@@ -32,7 +32,7 @@ class RecibirJsonController extends Controller
             }
 
             $lista_deseada = $datos[0];
-            $aux_id_anio = [20251, 20253];
+            $aux_id_anio = [];
             $cont = 0;
 
             for ($i = 0; $i < count($lista_deseada); $i++) {
@@ -69,7 +69,7 @@ class RecibirJsonController extends Controller
 
             $entradas_Materias = $datos[6] ?? [];
             $entradas_Escuelas = $datos[7] ?? [];
-            $entradas_Trabajos = $datos[9] ?? [];
+            $entradas_Trabajos = $datos[10] ?? [];
 
             for($tipo = 1; $tipo < 4; $tipo++) {
                 $mController = new MateriaController();
@@ -78,7 +78,7 @@ class RecibirJsonController extends Controller
                 switch($tipo) {
                     case 1:
                         $datosRequest['datos'] = $entradas_Materias;
-                        $datosRequest['tipo'] = $tipo;
+                        $datosRequest['tipo'] = $tipo; 
                         break;
                     case 2:
                         $datosRequest['datos'] = $entradas_Escuelas;
@@ -138,5 +138,7 @@ class RecibirJsonController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+
+        return app('App\Http\Controllers\PrepararDatosController')->Preparar_Datos();
     }
 }

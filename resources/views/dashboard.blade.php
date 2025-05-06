@@ -1,9 +1,6 @@
 @extends('layouts.app')
 @section('content')
-<!-- Navbar UASLP (MOVIDO ARRIBA DE TODO) -->
-
-
-
+<!-- Navbar UASLP MOVIDO ARRIBA -->
 
 </nav>
 @section('content')
@@ -15,21 +12,68 @@
         <a class="d-block icon-item"><img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics"></a>
     </div>
 
-    <!-- Contenido principal -->
+    <!-- Contenido principal INGRESAR AQUI LO QUE FALTE DE DASHBOARD -->
     <div class="container flex-grow-1 col-11 mx-auto mt-10">
         <!-- Contenedor para mensajes AJAX -->
         <div id="ajaxMessages" class="mt-3"></div>
-
-        <!-- Tabla para mostrar datos -->
-        <div id="tableContainer" class="mt-6 d-none">
-            <!-- ... (mantén tu contenido actual de la tabla) ... -->
+        <!-- TABLA CON RESULTADOS REALES -->
+        <!-- Contenedor para resultados - Fuera del modal -->
+        <div class="container mt-4" id="resultadosContainer" style="display: none;">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Resultados Normalizados</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                        <table class="table table-bordered table-striped table-hover mb-0" id="resultadosFinalesTable">
+                            <thead class="table-dark sticky-top" style="top: 0;">
+                                <tr>
+                                    <th style="width: 50%;">Entrada Original</th>
+                                    <th style="width: 50%;">Coincidencia Aprobada</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            <div class="card-footer text-end">
+                <!-- Footer vacío -->
+                <!-- Botones movidos debajo de la tabla y centrados -->
+                <div class="card-footer text-end">
+                    <div class="d-flex justify-content-center p-3">
+                        <div class="btn-group" role="group" aria-label="Seleccionar categoría">
+                            <button type="button" class="btn btn-primary" data-tipo-grafica="materias">Materias</button>
+                            <button type="button" class="btn btn-primary" data-tipo-grafica="carreras">Carreras</button>
+                            <button type="button" class="btn btn-primary" data-tipo-grafica="generacion">Generación</button>
+                        </div>
+                
+                        <div class="ms-3">
+                            <select class="form-select" id="tipoGrafica">
+                                <option value="pie">Gráfica de Pie</option>
+                                <option value="bar">Gráfica de Barras</option>
+                                <option value="line">Gráfica de Líneas</option>
+                            </select>
+                        </div>
+                
+                        <button class="btn btn-success ms-3" id="generarGraficaBtn" disabled>Generar Gráfica</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+
+<!-- GRÁFICA DE EJEMPLO -->
+    <div class="card-footer text-end">
+        <!-- Agregar contenedor para la gráfica -->
+        <div id="chartContainer" style="display: none; width: 80%; margin: 20px auto;">
+            <canvas id="dataChart"></canvas>
+        </div>
+    </div>
+
 
 <!-- Modal de carga -->
 <div class="modal fade" id="uploadFile" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl"><!-- Clase para tamaño extra grande -xl lg-->
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel">Carga de Información</h1>
@@ -47,7 +91,8 @@
                     </div>
 
                     <div class="col-md-6">
-                        <form id="ajaxUploadForm" method="POST" enctype="multipart/form-data">
+                        <form id="ajaxUploadForm" method="POST" enctype="multipart/form-data">   
+                            <!-- POST PARA UPLOAD NO MOVER-->
                             @csrf
                             <div class="mb-4">
                                 <label for="file" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #4a5568;">Selecciona un archivo .xlsx:</label>
@@ -59,7 +104,7 @@
                                 </div>
                             </div>
 
-                            <!-- Control de umbral mejorado -->
+                            <!-- Control de umbral 0 A 100 FUNCIONA NO MOVER-->
                             <div class="mb-4" style="position: relative;">
                                 <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
                                     <label for="umbral" style="font-weight: 500; color: #4a5568; margin-right: 0.5rem;">Umbral de similitud:</label>
@@ -98,6 +143,8 @@
     </div>
 </div>
 
+
+<!-- SCRIPTS AGREGAR LOS SCRIPTS EN ESTA SECCION -->
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -105,9 +152,12 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- SweetAlert2 para popups bonitos -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
+
+
+
 // Configuración de AJAX para CSRF token
+//AJAX C0NFIGURACION 
 $.ajaxSetup({
     headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -144,11 +194,12 @@ $(document).ready(function() {
         });
     });
 
-    // AJAX para subir archivo (tu código existente)
+    // AJAX para subir archivo POST A UPLOAD CON AJAX
     $('#ajaxUploadForm').on('submit', function(e) {
         e.preventDefault();
 
         $('#submitBtn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...');
+        //procesando ...
         $('#submitBtn').prop('disabled', true);
         $('#modalMessages').html('');
 
@@ -170,11 +221,13 @@ $(document).ready(function() {
                         </div>
                     `);
 
+                    //banner de regreso de la API 
+                      // Construir tabla de resultados
                     let resultadosHTML = `
                         <div class="mt-4">
                             <h5>Sugerencias encontradas:</h5>
                             <div class="table-responsive">
-                                <table class="table table-bordered">
+                                <table class="table table-bordered" id="resultadosTable">
                                     <thead>
                                         <tr>
                                             <th>Entrada</th>
@@ -183,16 +236,28 @@ $(document).ready(function() {
                                             <th>Corrección manual</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                    `;
+                                    <tbody>`;
+
+                    // Contador único para IDs
+                    let rowCounter = 0;
 
                     response.data.forEach(item => {
                         item.resultados.forEach(res => {
+                            const currentIndex = rowCounter++;
+                            
+                            // Opciones como botones seleccionables
                             let sugerencias = '';
                             if (res.opciones && res.opciones.length > 0) {
+                                sugerencias = '<div class="list-group">';
                                 res.opciones.forEach(opcion => {
-                                    sugerencias += `<div class="mb-1"><span class="badge bg-primary">${opcion}</span></div>`;
+                                    sugerencias += `
+                                        <button type="button" 
+                                            class="list-group-item list-group-item-action" 
+                                            onclick="document.getElementById('mejor-coincidencia-${currentIndex}').value = '${opcion.replace(/'/g, "\\'")}'">
+                                            ${opcion}
+                                        </button>`;
                                 });
+                                sugerencias += '</div>';
                             } else {
                                 sugerencias = '<em>Sin sugerencias</em>';
                             }
@@ -200,34 +265,211 @@ $(document).ready(function() {
                             resultadosHTML += `
                                 <tr>
                                     <td>${res.entrada}</td>
-                                    <td>${res.mejor_coincidencia ?? '<em>No encontrada</em>'}</td>
+                                    <td>
+                                        <input type="text" 
+                                            class="form-control" 
+                                            id="mejor-coincidencia-${currentIndex}" 
+                                            value="${res.mejor_coincidencia || ''}">
+                                    </td>
                                     <td>${sugerencias}</td>
                                     <td>
-                                        <input type="text" class="form-control" placeholder="Escribe tu corrección">
+                                        <div class="input-group">
+                                            <input type="text" 
+                                                class="form-control" 
+                                                id="correccion-manual-${currentIndex}" 
+                                                placeholder="Escribe corrección">
+                                            <button class="btn btn-outline-primary" 
+                                                type="button"
+                                                onclick="document.getElementById('mejor-coincidencia-${currentIndex}').value = document.getElementById('correccion-manual-${currentIndex}').value">
+                                                →
+                                            </button>
+                                        </div>
                                     </td>
-                                </tr>
-                            `;
+                                </tr>`;
                         });
                     });
-
                     resultadosHTML += `
                                     </tbody>
                                 </table>
+                                <div class="text-end mt-3">
+                                    <button type="button" class="btn btn-primary" id="guardarCambios">
+                                        Guardar cambios
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    `;
-
+                        </div>`;
+                            
                     $('#modalMessages').append(resultadosHTML);
 
-                    setTimeout(() => {
-                        $('#uploadFile').modal('hide');
-                        $('#ajaxMessages').html(`
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                ${response.message}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        `);
-                    }, 3000);
+
+                     // Evento para guardar cambios MODIFICAR PARA IMPLEMENTAR ID UNICO Y BASE DE DATOS --------------------------------
+                     $('#guardarCambios').click(function() {
+    let resultados = [];//dfghjkjhgfdsdfghjkjhgfdeertgyhjkjhgfddfghjhgfdfg
+    $('#resultadosTable tbody tr').each(function() {
+        const entrada = $(this).find('td:eq(0)').text();
+        const coincidencia = $(this).find('input[type="text"]:first').val();
+        
+        resultados.push({
+            entrada: entrada,
+            mejor_coincidencia: coincidencia
+        });
+
+        $.ajax({
+            url: "{{ route('Preparar_Datos') }}",
+            type: 'POST',
+            data: {
+                resultados: resultados,
+                _token: '{{ csrf_token() }}'
+            }
+        })
+    });
+    
+    console.log('JSON generado:', JSON.stringify(resultados, null, 2));
+    
+    // Actualizar tabla externa
+    const tablaBody = $('#resultadosFinalesTable tbody');
+    tablaBody.empty();
+    
+    resultados.forEach(item => {
+        tablaBody.append(`
+            <tr>
+                <td>${item.entrada}</td>
+                <td>${item.mejor_coincidencia}</td>
+            </tr>
+        `);
+    });
+    
+    // Mostrar el contenedor de resultados
+    $('#resultadosContainer').show();
+    
+    // Mostrar notificación con SweetAlert2
+    Swal.fire({
+        title: '¡Datos guardados!',
+        text: 'Los resultados se han guardado correctamente',
+        icon: 'success',
+        confirmButtonText: 'Aceptar'
+    }).then((result) => {
+        // Cerrar el modal clic en Aceptar BUG"
+        if (result.isConfirmed) {
+            $('#uploadFile').modal('hide');
+            
+            // mensaje en el contenedor principal
+            $('#ajaxMessages').html(`
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    Los datos han sido procesados(Normalizados) y guardados exitosamente.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `);
+        }
+    });
+});
+$(document).ready(function() {//---------------------------------------------------------
+    let tipoGraficaSeleccionada = 'pie'; // Valor por defecto
+    let categoriaSeleccionada = null;
+
+    $('#tipoGrafica').change(function() {
+        tipoGraficaSeleccionada = $(this).val();
+        if (categoriaSeleccionada) {
+            $('#generarGraficaBtn').prop('disabled', false);
+        }
+    });
+
+    $('#resultadosContainer .btn-primary').on('click', function() {
+        categoriaSeleccionada = $(this).data('tipo-grafica');
+        if (tipoGraficaSeleccionada) {
+            $('#generarGraficaBtn').prop('disabled', false);
+        }
+    });
+
+    $('#generarGraficaBtn').on('click', function() {
+        if (!categoriaSeleccionada) {
+            Swal.fire('Error', 'Por favor, selecciona una categoría (Materias, Carreras o Generación).', 'error');
+            return;
+        }
+
+        $.ajax({
+            url: `/get-data/${categoriaSeleccionada}`,
+            method: 'GET',
+            success: function(response) {
+                // Destruir gráfica anterior si existe
+                if(typeof window.myChart !== 'undefined') {
+                    window.myChart.destroy();
+                }
+
+                // Mostrar contenedor de gráfica
+                $('#chartContainer').show();
+
+                const ctx = document.getElementById('dataChart').getContext('2d');
+                let chartData;
+                let chartOptions = {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Total de ${categoriaSeleccionada.charAt(0).toUpperCase() + categoriaSeleccionada.slice(1)}: ${response.total}`
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw} registros`;
+                                }
+                            }
+                        }
+                    }
+                };
+                if (tipoGraficaSeleccionada === 'pie') {
+                    chartData = {
+                        labels: Object.keys(response.data),
+                        datasets: [{
+                            data: Object.values(response.data),
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56',
+                                '#4BC0C0', '#9966FF', '#FF9F40',
+                                '#E7E9ED', '#C9CBCF', '#28B463',
+                                '#A569BD', '#F1948A', '#F39C12'
+                            ],
+                        }]
+                    };
+                } else if (tipoGraficaSeleccionada === 'bar') {
+                    chartData = {
+                        labels: Object.keys(response.data),
+                        datasets: [{
+                            label: `Total de ${categoriaSeleccionada}`,
+                            data: Object.values(response.data),
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)'
+                        }]
+                    };
+                    chartOptions.scales = {
+                        y: {
+                            beginAtZero: true
+                        }
+                    };
+                } else if (tipoGraficaSeleccionada === 'line') {
+                    chartData = {
+                        labels: Object.keys(response.data),
+                        datasets: [{
+                            label: `Total de ${categoriaSeleccionada}`,
+                            data: Object.values(response.data),
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            fill: false
+                        }]
+                    };
+                    chartOptions.scales = {
+                        y: {
+                            beginAtZero: true
+                        }
+                    };
+                }
+                window.myChart = new Chart(ctx, {
+                    type: tipoGraficaSeleccionada,
+                    data: chartData,
+                    options: chartOptions
+                });
+            }
+        });
+    });
+});
+//----------------------------------------------------------------------------------------------------------------------------
                 } else {
                     $('#modalMessages').html(`
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">

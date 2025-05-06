@@ -69,6 +69,8 @@ class ExcelController extends Controller
     public $c_trabajos = [];
     public $c_titulacion = [];
     public $c_fecha_egel = [];
+    public $c_mat2 = [];
+    public $c_mat3 = [];
 
     public $DATOS = [];
 
@@ -134,6 +136,8 @@ class ExcelController extends Controller
             $c_inconveniente = array_column($data, 14);
             $c_trabajos = array_column($data, 13);
             $c_titulacion = array_column($data, 15);
+            $c_mat2 = array_column($data, 11);
+            $c_mat3 = 0;
 
             for ($i = 0; $i < 2; $i++) {
                 array_shift($c_clave);
@@ -147,6 +151,7 @@ class ExcelController extends Controller
                 array_shift($c_inconveniente);
                 array_shift($c_trabajos);
                 array_shift($c_titulacion);
+                array_shift($c_mat2);
             }
  
         }
@@ -183,9 +188,15 @@ class ExcelController extends Controller
 
             $c_titulacion = array_column($data, 14);
             array_shift($c_titulacion); 
+
+            $c_mat2 = array_column($data, 18);
+            array_shift($c_mat2);
+
+            $c_mat3 = array_column($data, 19);
+            array_shift($c_mat3);
         }
 
-        $c_id_anio = $this->ObtenFecha($fechas,$columnCount);
+        $c_id_anio = $this->ObtenFecha($fechas,$columnCount,$c_generacion);
 
         $DATOS[] = $c_id_anio;
         $DATOS[] = $c_clave;
@@ -199,6 +210,8 @@ class ExcelController extends Controller
         $DATOS[] = $c_inconveniente;
         $DATOS[] = $c_trabajos;
         $DATOS[] = $c_titulacion;
+        $DATOS[] = $c_mat2;
+        $DATOS[] = $c_mat3;
 
         //--------------------------materias-----------------------------
 
@@ -250,7 +263,7 @@ class ExcelController extends Controller
 
     //----------------------------------------------------------------------------------------------------------------
 
-    private function ObtenFecha($fechas,$columnCount)
+    private function ObtenFecha($fechas,$columnCount,$c_generacion)
     {
         $col_fecha = [];
         $count = 1;
@@ -278,6 +291,11 @@ class ExcelController extends Controller
         $json = json_encode($col_fecha, JSON_PRETTY_PRINT);
         $rutaArchivo = 'json/lista_fecha.json'; 
         Storage::put($rutaArchivo, $json);
+
+        foreach($c_generacion as &$c_generacion)
+        {
+            $c_generacion = substr($c_generacion, 0, 4);
+        }
 
         return $col_fecha;
     }
