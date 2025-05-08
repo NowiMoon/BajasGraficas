@@ -2,12 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Materia;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 
 class MateriaController extends Controller
 {
+    public function store(Request $request){
+        if (Materia::where('clave_materia', $request->clave_materia)->exists()) {
+            return redirect()->route('gestion_materias')->with('error', 'La materia ya existe');
+        }
+
+        $materia = new Materia();
+        $materia->clave_materia = $request->clave_materia;
+        $materia->nombre_materia = $request->nombre_materia;
+        $materia->save();
+        return redirect()->route('gestion_materias')->with('status', 'Materia creada correctamente');
+    }
+
     public function normalizar_datos(Request $request)
     {
         try {

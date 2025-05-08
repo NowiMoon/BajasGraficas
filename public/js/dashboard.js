@@ -163,7 +163,7 @@ $(document).ready(function() {
         formData.append('umbral', $('#umbral').val());
 
         $.ajax({
-            url: "{{ route('upload') }}",
+            url: uploadUrl, // Cambia esto por la URL correcta de tu ruta de subida
             type: 'POST',
             data: formData,
             processData: false,

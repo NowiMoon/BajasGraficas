@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Materia;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\File;
@@ -298,5 +299,47 @@ class ExcelController extends Controller
         }
 
         return $col_fecha;
+    }
+
+    //----------------------------------------------------------------------------------
+    public function uploadSubjects(Request $request){
+        $request->validate([
+            'file' => 'required|mimes:csv|max:2048', // Solo archivos .xlsx de máximo 2MB
+        ]);
+
+        $file = $request->file('file');
+
+        $spreadsheet = IOFactory::load($file->getPathname());
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $data = $sheet->toArray();
+        $columnas = count($data[0]);
+        
+
+        if ($columnas != 2){
+            dd($columnas);
+            return back()->withErrors(['file' => 'Archivo no aceptado: '. $columnas]);
+        }
+
+        $duplicados = 0;
+        $insertados = 0;
+
+        foreach ($data as $index => $row) {
+            if ($index == 0) continue;
+
+            $clave_materia = trim($row[0]);
+            $nombre_materia = trim($row[1]);
+
+            if (Materia::where('clave_materia', $clave_materia)->exists()) {
+                $duplicados++;
+            }else {
+                $materia = new Materia;
+                $materia->clave_materia = $clave_materia;
+                $materia->nombre_materia = $nombre_materia;
+                $materia->save();
+                $insertados++;
+            }
+        }
+        return back()->with('success', "Importación completada. Insertados: $insertados, Duplicados: $duplicados.");
     }
 }

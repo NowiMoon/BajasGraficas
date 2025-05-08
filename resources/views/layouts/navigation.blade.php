@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-md text-white shadow-sm" style="background-color:#004A98">
     <div class="container">
         <a class="navbar-brand" href="{{ url('/') }}">
-            <img src="{{ asset('images/UASLP.png') }}" alt="UASLP Logo">
+            <img src="{{ asset('images/UASLP.png') }}" style="height: 80px" alt="UASLP Logo">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
             <span class="navbar-toggler-icon"></span>
@@ -22,9 +22,6 @@
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        @if ( Auth::user()->user_type == 2 )
-                            <a class="dropdown-item" href="{{ route('gestion_materias') }}"> {{__('Agregar materias')}} </a>
-                        @endif
                         <a class="dropdown-item" href="{{ route('logout') }}"
                             onclick="event.preventDefault();
                                 document.getElementById('logout-form').submit();">
@@ -40,4 +37,4 @@
         </div>
     </div>
 </nav>
-<div style="background-color:#00B2E3; width:100%; height:10px"></div>    
+<div style="background-color:#00B2E3; width:100%; height:10px"></div>
