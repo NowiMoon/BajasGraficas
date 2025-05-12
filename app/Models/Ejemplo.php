@@ -10,6 +10,6 @@ class Ejemplo extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nombre_materia',
+        'nombre_materia'
     ];
 }

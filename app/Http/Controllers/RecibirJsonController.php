@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use App\Models\Alumno;
 
 class RecibirJsonController extends Controller
 {
@@ -32,7 +33,7 @@ class RecibirJsonController extends Controller
             }
 
             $lista_deseada = $datos[0];
-            $aux_id_anio = [];
+            $aux_id_anio = Alumno::pluck('Id_Reg_A')->toArray();
             $cont = 0;
 
             for ($i = 0; $i < count($lista_deseada); $i++) {

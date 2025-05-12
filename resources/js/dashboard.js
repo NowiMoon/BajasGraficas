@@ -379,10 +379,10 @@ $(document).ready(function() {//------------------------------------------------
                         datasets: [{
                             data: Object.values(response.data),
                             backgroundColor: [
-                                '#FF6384', '#36A2EB', '#FFCE56',
-                                '#4BC0C0', '#9966FF', '#FF9F40',
-                                '#E7E9ED', '#C9CBCF', '#28B463',
-                                '#A569BD', '#F1948A', '#F39C12'
+                                '#FF0000', '#0000FF', '#00FF00',
+                                '#FFFF00', '#800080', '#FFA500',
+                                '#00FFFF', '#32CD32', '#FF00FF',
+                                '#FF4500', '#9400D3', '#00FF7F'
                             ],
                         }]
                     };
@@ -392,7 +392,12 @@ $(document).ready(function() {//------------------------------------------------
                         datasets: [{
                             label: `Total de ${categoriaSeleccionada}`,
                             data: Object.values(response.data),
-                            backgroundColor: 'rgba(54, 162, 235, 0.8)'
+                            backgroundColor: [
+                                '#FF0000', '#0000FF', '#00FF00',
+                                '#FFFF00', '#800080', '#FFA500',
+                                '#00FFFF', '#32CD32', '#FF00FF',
+                                '#FF4500', '#9400D3', '#00FF7F'
+                            ],
                         }]
                     };
                     chartOptions.scales = {
