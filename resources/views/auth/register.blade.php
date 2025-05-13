@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">{{ __('Register') }}</div>
+                <div class="card-header" style="background-color: #004A98; color:white">{{ __('Nuevo usuario') }}</div>
 
                 <div class="card-body">
                     <form method="POST" action="{{ route('register') }}">
@@ -81,8 +81,11 @@
 
                         <div class="row mb-0">
                             <div class="col-md-8 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Register') }}
+                                <a href="{{ route('dashboard') }}" class="btn btn-danger ms-2">
+                                    {{ __('Cancelar') }}
+                                </a>
+                                <button type="submit" class="btn btn-primary" style="background-color: #004A98">
+                                    {{ __('Registrar') }}
                                 </button>
                             </div>
                         </div>

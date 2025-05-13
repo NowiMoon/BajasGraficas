@@ -8,11 +8,19 @@ use App\Http\Controllers\MateriaController;
 use App\Http\Controllers\PrepararDatosController;
 use App\Http\Controllers\RecibirJsonController;
 use App\Http\Controllers\GraficoController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
+    if (Auth::check()) {
+        if (Auth::User()->hasRole('admin')) {
+            return redirect()->route('dashboard');
+        } elseif (Auth::User()->hasRole('coordinador')) {
+            return redirect()->route('dashboard');
+        }
+        // Otros roles si aplica
+    }
     return redirect()->route('login');
 });
-
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -26,9 +34,6 @@ Route::middleware('auth')->group(function () {
 
 Route::group(['middleware' => ['auth', 'admin']], function () {
     // Rutas de administrador aquí
-    Route::get('/dashboard', function () {
-        return redirect()->route('register');
-    })->name('dashboard');
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
 });
@@ -36,10 +41,6 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 
 // Rutas del Coordinador
 Route::group(['middleware' => ['auth', 'coordinador']], function () {
-    // Ruta pantalla inicial
-    Route::get('/', function () {
-        return view('dashboard');
-    })->name('dashboard');
     //Ruta vista Gestion de materias
     Route::get('gestion_materias', function () {
         return view('gestion_materias');
