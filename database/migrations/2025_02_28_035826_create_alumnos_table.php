@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('alumnos', function (Blueprint $table) {
@@ -16,29 +13,23 @@ return new class extends Migration
             $table->unsignedBigInteger('Anio');
             $table->unsignedBigInteger('Id_Reg_A');
             $table->unsignedBigInteger('Cv_Alumno');
-            $table->string('Nombre_Alumno', 50);
+            $table->string('Nombre_Alumno', 100);
             $table->unsignedBigInteger('Gen');
-            $table->unsignedBigInteger('Cv_Carrera');
-            $table->string('email', 30);
-            $table->unsignedBigInteger('Cv_Mat_1');
-            $table->unsignedBigInteger('Cv_Mat_2')->nullable();
-            $table->unsignedBigInteger('Cv_Mat_3')->nullable();
-            $table->unsignedBigInteger('Id_Escuela')->nullable();
-            $table->unsignedBigInteger('Id_TBaja');
-            $table->string('Inc_Carr', 100)->nullable();
-            $table->unsignedBigInteger('Id_Empresa')->nullable();
-            $table->unsignedBigInteger('Id_Titulacion')->nullable();
+            $table->string('Carrera', 100);
+            $table->string('email', 50);
+            $table->string('Mat_1', 50)->nullable();
+            $table->string('Mat_2', 50)->nullable();
+            $table->string('Mat_3', 50)->nullable();
+            $table->string('Escuela',200)->nullable();
+            $table->string('TBaja',100);
+            $table->string('Inc_Carr', 1000)->nullable();
+            $table->string('Empresa',200)->nullable();
+            $table->string('Titulacion',100)->nullable();
 
             $table->timestamps();
-
-            //$table->foreign('CV_Carrera')->references('CV_Carrera')->on('Carrera')->onDelete('cascade');
-            //$table->foreign('Cv_Mat_1')->references('')->on('Personal')->onDelete('cascade'); //TODO: Is subject table missing??
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('alumnos');

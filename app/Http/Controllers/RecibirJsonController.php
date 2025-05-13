@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use App\Models\Alumno;
 
 class RecibirJsonController extends Controller
 {
@@ -32,8 +33,12 @@ class RecibirJsonController extends Controller
             }
 
             $lista_deseada = $datos[0];
-            $aux_id_anio = [20251, 20253];
+            $aux_id_anio = Alumno::pluck('Id_Reg_A')->toArray();
             $cont = 0;
+
+            if (!is_array($datos[13])) {
+                $datos[13] = array_fill(0, count($datos[0]), null);
+            }
 
             for ($i = 0; $i < count($lista_deseada); $i++) {
                 for($j = 0; $j < count($aux_id_anio); $j++) {
@@ -55,6 +60,14 @@ class RecibirJsonController extends Controller
             $ruta = 'json/lista_sin_duplicados.json';
             Storage::put($ruta, $json);
 
+            if (count($datos[0]) === 0){
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Los valores son válidos, pero ya existen en la base de datos',
+                    'codigo' => 'DUPLICADOS' // Nuevo campo identificador
+                ]);
+            }
+
             $mi_valor = 'Se ingresaron: ' . count($lista_deseada) . ' registros nuevos de ' . $cont;
 
             if (!Storage::exists($ruta)) {
@@ -69,7 +82,7 @@ class RecibirJsonController extends Controller
 
             $entradas_Materias = $datos[6] ?? [];
             $entradas_Escuelas = $datos[7] ?? [];
-            $entradas_Trabajos = $datos[9] ?? [];
+            $entradas_Trabajos = $datos[10] ?? [];
 
             for($tipo = 1; $tipo < 4; $tipo++) {
                 $mController = new MateriaController();
@@ -78,7 +91,7 @@ class RecibirJsonController extends Controller
                 switch($tipo) {
                     case 1:
                         $datosRequest['datos'] = $entradas_Materias;
-                        $datosRequest['tipo'] = $tipo;
+                        $datosRequest['tipo'] = $tipo; 
                         break;
                     case 2:
                         $datosRequest['datos'] = $entradas_Escuelas;
@@ -138,5 +151,7 @@ class RecibirJsonController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+
+        return app('App\Http\Controllers\PrepararDatosController')->Preparar_Datos();
     }
 }

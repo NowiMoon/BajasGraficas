@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\MateriaController;
+use App\Http\Controllers\PrepararDatosController;
 use App\Http\Controllers\RecibirJsonController;
+use App\Http\Controllers\GraficoController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -46,12 +48,9 @@ Route::group(['middleware' => ['auth', 'coordinador']], function () {
 
     Route::post('gestion_materias', [MateriaController::class,'store'])->name('gestion_materias.store');
     Route::post('/upload_subjects', [ExcelController::class, 'uploadSubjects'])->name('upload_subjects');
+    Route::post('/upload', [ExcelController::class, 'upload'])->name('upload');
+    Route::post('/Preparar-datos', [PrepararDatosController::class, 'Preparar_Datos'])->name('Preparar_Datos');
 });
-
-Route::get('/ayuda', function () {
-    return view('resultado');
-});
-
 
 /******************************************************************************************************************************************************************************/
 
@@ -63,13 +62,11 @@ Route::get('/upload-form', function () {
 
 Route::get('/recibir-json', [RecibirJsonController::class, 'recibirJson'])->name('recibirJson');
 
-//Route::get('/enviando/{columna_fecha}', [ExcelController::class, 'enviarDatos'])->name('enviarDatos');
-//Route::get('/recibir/{data}', [RecibirJsonController::class, 'recibirJson'])->name('recibirJson');
-
-//Route::get('/enviar-lista/{DATOS}', [ExcelController::class, 'enviarLista']);
-//Route::post('/recibir-lista', [RecibirJsonController::class, 'recibirJson']);
-
 Route::get('/enviar', [ExcelController::class, 'enviarLista']);
 Route::get('/recibir', [RecibirJsonController::class, 'recibirJson'])->name('recibirJson');
+
+//-----------------------------------------------------------------------------------------------------------------
+Route::post('/Preparar-datos', [PrepararDatosController::class, 'Preparar_Datos'])->name('Preparar_Datos');
+Route::get('/get-data/{tipo}', [GraficoController::class, 'getData']);
 
 require __DIR__.'/auth.php';
