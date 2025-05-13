@@ -1,9 +1,3 @@
-$.ajaxSetup({
-    headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    }
-});
-
 $(document).ready(function() {
 //----------------------------------------------------------------------------------------------------------------------------
     let tipoGraficaSeleccionada = 'pie'; // Valor por defecto
@@ -277,14 +271,14 @@ $(document).ready(function() {
     });
 
     $.ajax({
-            url: "{{ route('Preparar_Datos') }}",
+            url: prepararDatos,
             type: 'POST',
             data: {
                 resultados: resultados,
                 _token: '{{ csrf_token() }}'
             },
              headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
                 },
                 success: function (respuesta) {
                     $('#mensaje').text(respuesta.mensaje);
