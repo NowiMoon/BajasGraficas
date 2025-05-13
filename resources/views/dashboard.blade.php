@@ -6,19 +6,7 @@
 @section('content')
 <div class="d-flex my-0 py-0">
     <!-- Sidebar -->
-    <div class="d-flex flex-column bg-secondary bg-opacity-10 vh-100 align-items-center justify-content-evenly" style="width: 80px; z-index: 1000; position: fixed; top: 0; left: 0; height: 100vh;">
-        @if ( Auth::user()->user_type == 1 )
-        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href="{{ route('register') }}"><img src="{{ asset('images/users_icon.svg') }}" alt="Usuarios">Gestion de Usuarios</a>
-        <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
-        @endif
-        @if ( Auth::user()->user_type == 2 )
-        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href=" {{ route('gestion_materias') }} "><img src="{{ asset('images/uploadSubjects_icon.svg') }}" alt="Subir materias">Subir materias</a>
-        <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
-        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;"><img src="{{ asset('images/addData_icon.svg') }}" alt="Upload file" data-bs-toggle="modal" data-bs-target="#uploadFile" style="display: block; margin: 0 auto;">Subir datos</a>
-        <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
-        @endif
-        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;"><img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics" style="display: block; margin: 0 auto;">Generar Reporte</a>
-    </div>
+    
 
 
     <!-- Contenido principal INGRESAR AQUI LO QUE FALTE DE DASHBOARD -->
