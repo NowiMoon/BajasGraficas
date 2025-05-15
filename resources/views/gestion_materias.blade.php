@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex ps-3 align-items-center bg-secondary bg-opacity-25 vw-100" style="height: 50px">
-    <h3 class="fw-bold">Gestión de materias</h1>
+<div class="d-flex ps-3 align-items-center bg-secondary bg-opacity-25 vw-100" style="height: 50px; margin-top: 108px">
+    <a class="pe-3" href="{{ route('dashboard') }}"><img src="{{ asset('images/back.svg') }}" alt="Regresar"></a>
+    <h3 class="fw-bold mb-0">Gestión de materias</h1>
 </div>
 
 <div class="py-4 px-5">

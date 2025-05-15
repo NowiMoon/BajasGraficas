@@ -1,35 +1,88 @@
 @extends('layouts.app')
 @section('content')
-<!-- Navbar UASLP MOVIDO ARRIBA -->
 
-</nav>
+<div style="display: flex;">
+    <div class="d-flex flex-column bg-secondary bg-opacity-10 align-items-center justify-content-evenly"
+         style="width: 80px; z-index: 1000; position: fixed; top: 80px; left: 0; height: calc(100vh - 80px);">
+        @if ( Auth::user()->user_type == 1 )
+        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href="{{ route('register') }}"><img src="{{ asset('images/users_icon.svg') }}" alt="Usuarios">Gestion de Usuarios</a>
+        <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
+        @endif
+        @if ( Auth::user()->user_type == 2 )
+        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href=" {{ route('gestion_materias') }} "><img src="{{ asset('images/uploadSubjects_icon.svg') }}" alt="Subir materias">Subir materias</a>
+        <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
+        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;"><img src="{{ asset('images/addData_icon.svg') }}" alt="Upload file" data-bs-toggle="modal" data-bs-target="#uploadFile" style="display: block; margin: 0 auto;">Subir datos</a>
+        <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
+        @endif
+        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;"><img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics" style="display: block; margin: 0 auto;">Generar Reporte</a>
+    </div>
+    <div style="margin-left: 80px; margin-top: 80px; width: 100%;">
+        <div class="container">
+            @yield('content')
+        </div>
+    </div>
+</div>
+
 @section('content')
 <div class="d-flex my-0 py-0">
-    <!-- Sidebar -->
+    <!-- Sidebar -->`
     
-
-
     <!-- Contenido principal INGRESAR AQUI LO QUE FALTE DE DASHBOARD -->
     <div class="container flex-grow-1 col-11 mx-auto mt-10">
         <!-- Contenedor para mensajes AJAX -->
         <div id="ajaxMessages" class="mt-3"></div>
         <!-- TABLA CON RESULTADOS REALES -->
         <!-- Contenedor para resultados - Fuera del modal -->
-        <div class="container mt-4" id="resultadosContainer"> <!--style="display: none;"-->
+        <div class="container mt-4 pt-4" id="resultadosContainer"> <!--style="display: none;"-->
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="card-title mb-0">Resultados Normalizados</h3>
+                <div class="card-header text-white" style="background-color: #004A98;">
+                    <h3 class="card-title mb-0">Datos</h3>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                         <table class="table table-bordered table-striped table-hover mb-0" id="resultadosFinalesTable">
                             <thead class="table-dark sticky-top" style="top: 0;">
                                 <tr>
-                                    <th style="width: 50%;">Entrada Original</th>
-                                    <th style="width: 50%;">Coincidencia Aprobada</th>
+                                    <th style="width: 4%; background-color: #00B2E3">Id</th>
+                                    <th style="width: 4%; background-color: #00B2E3">Año</th>
+                                    <th style="width: 4%; background-color: #00B2E3">Id Reg</th>
+                                    <th style="width: 5%; background-color: #00B2E3">Clave</th>
+                                    <th style="width: 8%; background-color: #00B2E3">Nombre</th>
+                                    <th style="width: 5%; background-color: #00B2E3">Generación</th>
+                                    <th style="width: 8%; background-color: #00B2E3">Carrera</th>
+                                    <th style="width: 5%; background-color: #00B2E3">Email</th>
+                                    <th style="width: 5%; background-color: #00B2E3">Mat1</th>
+                                    <th style="width: 5%; background-color: #00B2E3">Mat2</th>
+                                    <th style="width: 5%; background-color: #00B2E3">Mat3</th>
+                                    <th style="width: 5%; background-color: #00B2E3">Escuela</th>
+                                    <th style="width: 5%; background-color: #00B2E3">Tipo Baja</th>
+                                    <th style="width: 5%; background-color: #00B2E3">Inconveniente</th>
+                                    <th style="width: 5%; background-color: #00B2E3">Empresa</th>
+                                    <th style="width: 5%; background-color: #00B2E3">Titulación</th>
                                 </tr>
                             </thead>
-                            <tbody></tbody>
+                            <tbody>
+                                @foreach($alumnos as $alumno)
+                                    <tr>
+                                        <td>{{ $alumno->Id_Registro }}</td>
+                                        <td>{{ $alumno->Anio }}</td>
+                                        <td>{{ $alumno->Id_Reg_A }}</td>
+                                        <td>{{ $alumno->Cv_Alumno }}</td>
+                                        <td>{{ $alumno->Nombre_Alumno }}</td>
+                                        <td>{{ $alumno->Gen }}</td>
+                                        <td>{{ $alumno->Carrera }}</td>
+                                        <td>{{ $alumno->email }}</td>
+                                        <td>{{ $alumno->Mat_1 }}</td>
+                                        <td>{{ $alumno->Mat_2 }}</td>
+                                        <td>{{ $alumno->Mat_3 }}</td>
+                                        <td>{{ $alumno->Escuela }}</td>
+                                        <td>{{ $alumno->TBaja }}</td>
+                                        <td>{{ $alumno->Inc_Carr }}</td>
+                                        <td>{{ $alumno->Empresa }}</td>
+                                        <td>{{ $alumno->Titulacion }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
                         </table>
                     </div>
                 </div>
