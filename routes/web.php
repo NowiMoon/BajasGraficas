@@ -10,6 +10,7 @@ use App\Http\Controllers\RecibirJsonController;
 use App\Http\Controllers\GraficoController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PDFController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -28,6 +29,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/descargar-pdf', [PDFController::class, 'downloadPDF'])->name('downloadPDF');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

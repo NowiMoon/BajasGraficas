@@ -14,7 +14,7 @@
         <a class="d-block icon-item text-center" style="text-decoration: none; color: black;"><img src="{{ asset('images/addData_icon.svg') }}" alt="Upload file" data-bs-toggle="modal" data-bs-target="#uploadFile" style="display: block; margin: 0 auto;">Subir datos</a>
         <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
         @endif
-        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;"><img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics" style="display: block; margin: 0 auto;">Generar Reporte</a>
+        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href="{{ route('downloadPDF') }}"><img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics" style="display: block; margin: 0 auto;">Generar Reporte</a>
     </div>
     <div style="margin-left: 80px; margin-top: 80px; width: 100%;">
         <div class="container">
