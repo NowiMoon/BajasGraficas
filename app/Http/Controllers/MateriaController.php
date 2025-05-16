@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use App\Models\Materia;
 
 class MateriaController extends Controller
 {
@@ -75,5 +76,23 @@ class MateriaController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function store(Request $request){
+        if (Materia::where('clave_materia', $request->clave_materia)->exists()) {
+            return redirect()->back()->with('error', 'La materia ya existe');
+        }
+
+        $materia = new Materia();
+        $materia->clave_materia = $request->clave_materia;
+        $materia->nombre_materia = $request->nombre_materia;
+        $materia->save();
+
+        try{
+            return redirect()->back()->with('success', 'Materia creada correctamente');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al guardar la materia');
+        }
+        
     }
 }

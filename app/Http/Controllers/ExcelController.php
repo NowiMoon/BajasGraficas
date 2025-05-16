@@ -316,8 +316,7 @@ class ExcelController extends Controller
         
 
         if ($columnas != 2){
-            dd($columnas);
-            return back()->withErrors(['file' => 'Archivo no aceptado: '. $columnas]);
+            return redirect()->back()->with('error', 'Archivo con formato inválido.');
         }
 
         $duplicados = 0;
@@ -339,6 +338,11 @@ class ExcelController extends Controller
                 $insertados++;
             }
         }
-        return back()->with('success', "Importación completada. Insertados: $insertados, Duplicados: $duplicados.");
+
+        try{
+            return back()->with('success', "Importación completada. Insertados: $insertados, Duplicados: $duplicados.");
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al procesar el archivo.');
+        }
     }
 }
