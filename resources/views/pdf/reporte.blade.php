@@ -93,13 +93,26 @@
         </div>
     </div>
 
-    <div class="chart-section">
+    <!--<div class="chart-section">
         <div class="chart-name">
             <label>Nombre de la Gráfica</label>
             <div class="date-field" id="nombreGrafica">{{ $nombreGrafica ?? '' }}</div>
         </div>
         <div class="chart-container">
             GRÁFICA AQUÍ
+        </div>
+    </div>-->
+    <div class="chart-section">
+        <div class="chart-name">
+            <label>Nombre de la Gráfica</label>
+            <div class="date-field">{{ $nombreGrafica ?? '' }}</div>
+        </div>
+        <div class="chart-container">
+            @if(!empty($imagenGrafica))
+                <img src="{{ $imagenGrafica }}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+            @else
+                <span>No se encontró la imagen de la gráfica</span>
+            @endif
         </div>
     </div>
 

@@ -11,6 +11,7 @@ use App\Http\Controllers\GraficoController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PDFController;
+use App\Http\Controllers\BotonesController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -29,7 +30,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/descargar-pdf', [PDFController::class, 'downloadPDF'])->name('downloadPDF');
+    Route::post('/descargar-pdf', [PDFController::class, 'downloadPDF'])->name('downloadPDF');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -71,6 +72,5 @@ Route::get('/recibir', [RecibirJsonController::class, 'recibirJson'])->name('rec
 
 //-----------------------------------------------------------------------------------------------------------------
 Route::post('/Preparar-datos', [PrepararDatosController::class, 'Preparar_Datos'])->name('Preparar_Datos');
-Route::get('/get-data/{tipo}', [GraficoController::class, 'getData']);
-
+Route::get('/get-data', [GraficoController::class, 'getData'])->name('get.data');
 require __DIR__.'/auth.php';

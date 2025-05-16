@@ -14,7 +14,11 @@
         <a class="d-block icon-item text-center" style="text-decoration: none; color: black;"><img src="{{ asset('images/addData_icon.svg') }}" alt="Upload file" data-bs-toggle="modal" data-bs-target="#uploadFile" style="display: block; margin: 0 auto;">Subir datos</a>
         <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
         @endif
-        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href="{{ route('downloadPDF') }}"><img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics" style="display: block; margin: 0 auto;">Generar Reporte</a>
+        <!--<a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href="{{ route('downloadPDF') }}"><img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics" style="display: block; margin: 0 auto;">Generar Reporte</a>-->
+        <button id="btnDownloadPDF" style="background:none; border:none; cursor:pointer; color:black; text-align:center;">
+            <img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics" style="display: block; margin: 0 auto;">
+            Generar Reporte
+        </button>
     </div>
     <div style="margin-left: 80px; margin-top: 80px; width: 100%;">
         <div class="container">
@@ -92,22 +96,129 @@
                 <p id="mensaje"></p>
 
                 <div class="card-footer text-end">
-                    <div class="d-flex justify-content-center p-3">
-                        <div class="btn-group" role="group" aria-label="Seleccionar categoría">
-                            <button type="button" class="btn btn-primary" data-tipo-grafica="materias">Materias</button>
-                            <button type="button" class="btn btn-primary" data-tipo-grafica="carreras">Carreras</button>
-                            <button type="button" class="btn btn-primary" data-tipo-grafica="generacion">Generación</button>
+                <div class="d-flex flex-wrap align-items-center p-3">
+                    <!-- Primera fila de opciones -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-center gap-4 mb-3">
+                        <!-- Sección Tipo de Gráfica (sin checkbox) -->
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label mb-0">Tipo de gráfica:</label>
+                                <select class="form-select" id="tipoGrafica" style="width: 170px;">
+                                    <option value="pie">Gráfica de Pie</option>
+                                    <option value="bar">Gráfica de Barras</option>
+                                    <option value="line">Gráfica de Líneas</option>
+                                </select>
+                            </div>
+
+                            <!-- Sección Tipo de Baja con checkbox -->
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input filtro-unico" type="checkbox" id="bajaCheckbox">
+                                    <label class="form-check-label" for="bajaCheckbox">Tipo de baja:</label>
+                                </div>
+                                <select class="form-select" id="baja" style="width: 150px;">
+                                    <option value="todas">Todas</option>
+                                    <option value="Trámite de Pasantía">Trámite de Pasantía</option>
+                                    <option value="Baja Temporal o Definitiva">Baja Temporal o Definitiva</option>
+                                    <option value="Cambio de Carrera">Cambio de Carrera</option>
+                                </select>
+                            </div>
+
+                            <!-- Sección Generación (ya tiene checkbox) -->
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input filtro-unico" type="checkbox" id="generacion">
+                                    <label class="form-check-label" for="generacion">Generación:</label>
+                                </div>
+                                <input type="text" class="form-control" id="anio_1" style="width: 70px;">
+                                <span class="mx-1">a</span>
+                                <input type="text" class="form-control" id="anio_2" style="width: 70px;">
+                            </div>
+
+                            <!-- Sección Carrera con checkbox -->
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input filtro-unico" type="checkbox" id="carreraCheckbox" >
+                                      <label class="form-check-label" for="carreraCheckbox">Carrera:</label>
+                                </div>
+                                <select class="form-select" id="Carrera" style="width: 150px;">
+                                    <option value="todas">Todas</option>
+                                    <option value="Ingeniero en Computación">Ingeniero en Computación</option>
+                                    <option value="Ingeniero en Sistemas Inteligentes">Ingeniero en Sistemas Inteligentes</option>
+                                    <option value="Ingeniero en Informática">Ingeniero en Informática</option>
+                                </select>
+                            </div>
                         </div>
-                
-                        <div class="ms-3">
-                            <select class="form-select" id="tipoGrafica">
-                                <option value="pie">Gráfica de Pie</option>
-                                <option value="bar">Gráfica de Barras</option>
-                                <option value="line">Gráfica de Líneas</option>
-                            </select>
+
+                        <!-- Segunda fila de opciones -->
+                        <div class="d-flex flex-wrap align-items-center justify-content-center gap-4 mb-3">
+                            <!-- Sección Escuela con checkbox -->
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input filtro-unico" type="checkbox" id="escuelaCheckbox">
+                                    <label class="form-check-label" for="escuelaCheckbox">Escuela de procedencia:</label>
+                                </div>
+                                <select class="form-select" id="escuela" style="width: 170px;">
+                                    <option value="todas">Todas</option>
+                                    <option value="CBTIS 121">CBTis 121</option>
+                                    <option value="COBACH 12">COBACH 12"</option>
+                                </select>
+                            </div>
+
+                            <!-- Sección Materias Dificiles con checkbox -->
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input filtro-unico" type="checkbox" id="materiaCheckbox">
+                                    <label class="form-check-label" for="materiaCheckbox">Materia difícil:</label>
+                                </div>
+                                <select class="form-select" id="materia" style="width: 150px;">
+                                    <option value="todas">Todas</option>
+                                    <option value="Pensamiento Algorítmico">Pensamiento Algorítmico</option>
+                                    <option value="Química A">Química A</option>
+                                    <option value="Estucturas de Datos I">Estucturas de Datos I</option>
+                                </select>
+                            </div>
+
+                            <!-- Sección Tipo de titulación con checkbox -->
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input filtro-unico" type="checkbox" id="titulacionCheckbox">
+                                    <label class="form-check-label" for="titulacionCheckbox">Tipo de titulación:</label>
+                                </div>
+                                <select class="form-select" id="tipo_titulacion" style="width: 150px;">
+                                    <option value="todas">Todas</option>
+                                    <option value="Trabajo recepcional">Trabajo recepcional</option>
+                                    <option value="Trabajo por excelencia">Trabajo por excelencia</option>
+                                    <option value="Trabajo colectivo">Trabajo colectivo</option>
+                                    <option value="Memorias de actividad profesional">Memorias de actividad profesional</option>
+                                    <option value="Examen General de Conocimientos">Examen General de Conocimientos</option>
+                                    <option value="Curso de opción a No trabajo recepcional (Diplomado)">Curso de opción a No trabajo recepcional (Diplomado)</option>
+                                    <option value="Un semestre de maestría">Un semestre de maestría</option>
+                                    <option value="Dos semestres de maestría">Dos semestres de maestría</option>
+                                    <option value="Exención de Examen Promedio mayor a 9">Exención de Examen Promedio mayor a 9</option>
+                                    <option value="Examen General de Egreso de la Licenciatura (EGEL)">Examen General de Egreso de la Licenciatura (EGEL)</option>
+                                    <option value="Por artículo científico">Por artículo científico</option>
+                                    <option value="Ninguna">Ninguna</option>
+                                </select>
+                            </div>
                         </div>
-                
+                        <div class="d-flex flex-wrap align-items-center justify-content-center gap-4 mb-3">
+                            <!-- Sección Trabajo con checkbox -->
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input filtro-unico" type="checkbox" id="escuelaCheckbox">
+                                    <label class="form-check-label" for="trabajoCheckbox">Lugar donde labura:</label>
+                                </div>
+                                <select class="form-select" id="trabajo" style="width: 150px;">
+                                    <option value="todas">Todas</option>
+                                    <option value="BOCH">Boch</option>
+                                    <option value="GOOGLE">Google</option>
+                                    <option value="HONEYHELL">Honeyhell</option>
+                                    <option value="DAIKIN">Daikin</option>
+                                    <option value="ABB">ABB</option>
+                                </select>
+                            </div>
                         <button class="btn btn-success ms-3" id="generarGraficaBtn">Generar Gráfica</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -218,32 +329,56 @@
 
 $(document).ready(function() {
 //----------------------------------------------------------------------------------------------------------------------------
+    
+//----------------------------------------------------------------------------------------------------------------------------
+    let filtroActivo = null;
     let tipoGraficaSeleccionada = 'pie'; // Valor por defecto
-    let categoriaSeleccionada = null;
 
-        $('#tipoGrafica').change(function() {
+    // Manejar cambio en checkboxes
+    $('.filtro-unico').change(function() {
+        if ($(this).is(':checked')) {
+            // Deshabilitar otros checkboxes
+            $('.filtro-unico').not(this).prop('disabled', true);
+            filtroActivo = $(this).attr('id');
+        } else {
+            // Habilitar todos si se desmarca
+            $('.filtro-unico').prop('disabled', false);
+            filtroActivo = null;
+        }
+    });    
+
+    $('#tipoGrafica').change(function() {
         tipoGraficaSeleccionada = $(this).val();
-        if (categoriaSeleccionada) {
-            $('#generarGraficaBtn').prop('disabled', false);
-        }
-    });
-
-    $('button[data-tipo-grafica]').on('click', function() { 
-        categoriaSeleccionada = $(this).data('tipo-grafica');
-        if (tipoGraficaSeleccionada) {
-            $('#generarGraficaBtn').prop('disabled', false);
-        }
     });
 
     $('#generarGraficaBtn').on('click', function() {
-        if (!categoriaSeleccionada) {
-            Swal.fire('Error', 'Por favor, selecciona una categoría (Materias, Carreras o Generación).', 'error');
-            return;
-        }
+        // Obtener el tipo de filtro activo (checkbox seleccionado)
+        let tipoFiltro = null;
+        $('.filtro-unico').each(function() {
+            if ($(this).is(':checked')) {
+                tipoFiltro = $(this).attr('id').replace('Checkbox', '').toLowerCase();
+            }
+        });
+
+        // Construir objeto de filtros dinámicamente
+        const filtros = {
+            tipo_grafica: tipoGraficaSeleccionada,
+            tipo_filtro: tipoFiltro // Agregamos el tipo de filtro seleccionado
+        };
+
+        filtros.baja = $('#baja').val();
+        filtros.generacion_desde = $('#anio_1').val();
+        filtros.generacion_hasta = $('#anio_2').val();
+        filtros.carrera = $('#Carrera').val();
+        filtros.escuela = $('#escuela').val();
+        filtros.materia = $('#materia').val();
+        filtros.trabajo = $('#trabajo').val();
+        filtros.tipo_titulacion = $('#tipo_titulacion').val();
 
         $.ajax({
-            url: `/get-data/${categoriaSeleccionada}`,
+             url: "{{ route('get.data') }}",
             method: 'GET',
+            data: filtros,
             success: function(response) {
                 // Destruir gráfica anterior si existe
                 if(typeof window.myChart !== 'undefined') {
@@ -260,7 +395,8 @@ $(document).ready(function() {
                     plugins: {
                         title: {
                             display: true,
-                            text: `Total de ${categoriaSeleccionada.charAt(0).toUpperCase() + categoriaSeleccionada.slice(1)}: ${response.total}`
+                            //text: `Total de ${categoriaSeleccionada.charAt(0).toUpperCase() + categoriaSeleccionada.slice(1)}: ${response.total}`
+                            text: `Total de ${tipoFiltro.charAt(0).toUpperCase() + tipoFiltro.slice(1)}: ${response.total}`
                         },
                         tooltip: {
                             callbacks: {
@@ -288,7 +424,7 @@ $(document).ready(function() {
                     chartData = {
                         labels: Object.keys(response.data),
                         datasets: [{
-                            label: `Total de ${categoriaSeleccionada}`,
+                            label: `Total de ${tipoFiltro}`,
                             data: Object.values(response.data),
                             backgroundColor: 'rgba(54, 162, 235, 0.8)'
                         }]
@@ -302,7 +438,7 @@ $(document).ready(function() {
                     chartData = {
                         labels: Object.keys(response.data),
                         datasets: [{
-                            label: `Total de ${categoriaSeleccionada}`,
+                            label: `Total de ${tipoFiltro}`,
                             data: Object.values(response.data),
                             borderColor: 'rgba(75, 192, 192, 1)',
                             fill: false
@@ -323,6 +459,48 @@ $(document).ready(function() {
         });
     });
 //----------------------------------------------------------------------------------------------------------------------------
+    $('#btnDownloadPDF').on('click', function () {
+    // Obtener el canvas y la imagen base64
+    let canvas = document.getElementById('dataChart');
+    let base64Image = canvas.toDataURL('image/png');
+
+    fetch("{{ route('downloadPDF') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+        body: JSON.stringify({
+            periodoConsulta: "Enero - Abril",
+            nombreGrafica: "Comparativa de Bajas",
+            descripcionGrafica: "Comparación por semestre",
+            imagenGrafica: base64Image, // aquí ahora está correcto
+        }),
+    })
+    .then(response => {
+        if (!response.ok) return response.json().then(err => { throw new Error(err.detalle); });
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "reporte.pdf";
+        a.click();
+        window.URL.revokeObjectURL(url);
+
+        // Aquí va el SweetAlert2
+        Swal.fire({
+            title: '¡PDF descargado!',
+            text: 'El reporte se descargó correctamente.',
+            icon: 'success',
+            confirmButtonText: 'Aceptar'
+        });
+    })
+});
+
+    
+//------------------------------------------------------------------------------------------------------------------------------
 
     // Explicación del umbral con SweetAlert2
     $('#infoUmbralBtn').click(function() {
@@ -509,17 +687,17 @@ $(document).ready(function() {
     console.log('JSON generado:', JSON.stringify(resultados, null, 2));
     
     // Actualizar tabla externa
-    const tablaBody = $('#resultadosFinalesTable tbody');
-    tablaBody.empty();
+    //const tablaBody = $('#resultadosFinalesTable tbody');
+    //tablaBody.empty();    
     
-    resultados.forEach(item => {
-        tablaBody.append(`
-            <tr>
-                <td>${item.entrada}</td>
-                <td>${item.mejor_coincidencia}</td>
-            </tr>
-        `);
-    });
+    //resultados.forEach(item => {
+    //    tablaBody.append(`
+    //        <tr>
+    //            <td>${item.entrada}</td>
+    //            <td>${item.mejor_coincidencia}</td>
+    //        </tr>
+    //    `);
+    //});
     
     // Mostrar el contenedor de resultados
     $('#resultadosContainer').show();
