@@ -29,6 +29,7 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        try {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'clave_usuario' => ['required', 'integer', 'max_digits:10', 'unique:'.User::class],
@@ -43,9 +44,11 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
+        //Auth::login($user);
 
-        Auth::login($user);
-
-        return redirect()->route('register');
+        return redirect()->route('register')->with('success', 'Usuario creado correctamente');
+    } catch (\Exception $e) {
+        return redirect()->route('register')->with('error', 'No se pudo crear el usuario');
+    }
     }
 }
