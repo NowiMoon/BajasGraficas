@@ -73,4 +73,7 @@ Route::get('/recibir', [RecibirJsonController::class, 'recibirJson'])->name('rec
 //-----------------------------------------------------------------------------------------------------------------
 Route::post('/Preparar-datos', [PrepararDatosController::class, 'Preparar_Datos'])->name('Preparar_Datos');
 Route::get('/get-data', [GraficoController::class, 'getData'])->name('get.data');
+Route::get('/api/materias', [BotonesController::class, 'materias']);
+Route::get('/api/trabajos', [BotonesController::class, 'trabajos']);
+Route::get('/api/escuelas', [BotonesController::class, 'escuelas']);
 require __DIR__.'/auth.php';

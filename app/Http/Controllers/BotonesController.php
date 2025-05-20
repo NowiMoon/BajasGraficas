@@ -7,15 +7,30 @@ use App\Models\Alumno;
 
 class BotonesController extends Controller
 {
-    public function getSelectores(){
-        $materias = Alumno::pluck('Mat_1')->unique()->values()->all();
-        $trabajos = Alumno::pluck('Empresa')->unique()->values()->all();
-        $escuelas = Alumno::pluck('Escuela')->unique()->values()->all();
+        public function materias()
+        {
+            return response()->json(Alumno::whereNotNull('Mat_1')
+            ->pluck('Mat_1')
+            ->unique()
+            ->values()
+            ->all());
+        }
 
-        return view('dashboard', [
-            'escuelas' => $escuelas,
-            'materias' => $materias,
-            'trabajos' => $trabajos,
-        ]);
-    }
+        public function trabajos()
+        {
+            return response()->json(Alumno::whereNotNull('Empresa')
+            ->pluck('Empresa')
+            ->unique()
+            ->values()
+            ->all());
+        }
+
+        public function escuelas()
+        {
+            return response()->json(Alumno::whereNotNull('Escuela')
+            ->pluck('Escuela')
+            ->unique()
+            ->values()
+            ->all());
+        }
 }

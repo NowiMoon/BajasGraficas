@@ -159,8 +159,6 @@
                                 </div>
                                 <select class="form-select" id="escuela" style="width: 170px;">
                                     <option value="todas">Todas</option>
-                                    <option value="CBTIS 121">CBTis 121</option>
-                                    <option value="COBACH 12">COBACH 12"</option>
                                 </select>
                             </div>
 
@@ -172,9 +170,6 @@
                                 </div>
                                 <select class="form-select" id="materia" style="width: 150px;">
                                     <option value="todas">Todas</option>
-                                    <option value="Pensamiento Algorítmico">Pensamiento Algorítmico</option>
-                                    <option value="Química A">Química A</option>
-                                    <option value="Estucturas de Datos I">Estucturas de Datos I</option>
                                 </select>
                             </div>
 
@@ -210,11 +205,6 @@
                                 </div>
                                 <select class="form-select" id="trabajo" style="width: 150px;">
                                     <option value="todas">Todas</option>
-                                    <option value="BOCH">Boch</option>
-                                    <option value="GOOGLE">Google</option>
-                                    <option value="HONEYHELL">Honeyhell</option>
-                                    <option value="DAIKIN">Daikin</option>
-                                    <option value="ABB">ABB</option>
                                 </select>
                             </div>
                         <button class="btn btn-success ms-3" id="generarGraficaBtn">Generar Gráfica</button>
@@ -329,7 +319,50 @@
 
 $(document).ready(function() {
 //----------------------------------------------------------------------------------------------------------------------------
-    
+    $('#materia').on('focus', function () {
+        $.ajax({
+            url: '/api/materias',
+            type: 'GET',
+            success: function (data) {
+                const select = $('#materia');
+                select.find('option:not([value="todas"])').remove();
+
+                data.forEach(function (materia) {
+                    select.append('<option value="' + materia + '">' + materia + '</option>');
+                });
+            }
+        });
+    });
+
+    $('#trabajo').on('focus', function () {
+        $.ajax({
+            url: '/api/trabajos',
+            type: 'GET',
+            success: function (data) {
+                const select = $('#trabajo');
+                select.find('option:not([value="todas"])').remove();
+
+                data.forEach(function (trabajo) {
+                    select.append('<option value="' + trabajo + '">' + trabajo + '</option>');
+                });
+            }
+        });
+    });
+
+    $('#escuela').on('focus', function () {
+        $.ajax({
+            url: '/api/escuelas',
+            type: 'GET',
+            success: function (data) {
+                const select = $('#escuela');
+                select.find('option:not([value="todas"])').remove();
+
+                data.forEach(function (escuela) {
+                    select.append('<option value="' + escuela + '">' + escuela + '</option>');
+                });
+            }
+        });
+    });
 //----------------------------------------------------------------------------------------------------------------------------
     let filtroActivo = null;
     let tipoGraficaSeleccionada = 'pie'; // Valor por defecto
@@ -352,13 +385,32 @@ $(document).ready(function() {
     });
 
     $('#generarGraficaBtn').on('click', function() {
-        // Obtener el tipo de filtro activo (checkbox seleccionado)
-        let tipoFiltro = null;
-        $('.filtro-unico').each(function() {
-            if ($(this).is(':checked')) {
-                tipoFiltro = $(this).attr('id').replace('Checkbox', '').toLowerCase();
-            }
+    // Verificar si hay algún checkbox de filtro seleccionado
+    let filtroSeleccionado = false;
+    $('.filtro-unico').each(function() {
+        if ($(this).is(':checked')) {
+            filtroSeleccionado = true;
+            return false; // Salir del each si encuentra uno seleccionado
+        }
+    });
+
+    if (!filtroSeleccionado) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Debes seleccionar al menos un tipo de filtro para generar la gráfica',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
         });
+        return; // Detener la ejecución
+    }
+
+    // Obtener el tipo de filtro activo (checkbox seleccionado)
+    let tipoFiltro = null;
+    $('.filtro-unico').each(function() {
+        if ($(this).is(':checked')) {
+            tipoFiltro = $(this).attr('id').replace('Checkbox', '').toLowerCase();
+        }
+    });
 
         // Construir objeto de filtros dinámicamente
         const filtros = {
@@ -464,6 +516,18 @@ $(document).ready(function() {
     let canvas = document.getElementById('dataChart');
     let base64Image = canvas.toDataURL('image/png');
 
+    // Verificar si hay datos en el gráfico (asumiendo que usas Chart.js)
+    const chartInstance = Chart.getChart(canvas);
+    if (!chartInstance || chartInstance.data.datasets.every(dataset => dataset.data.length === 0)) {
+        Swal.fire({
+            title: 'Error',
+            text: 'No hay datos en el gráfico para generar el PDF.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
+        return;
+    }
+
     fetch("{{ route('downloadPDF') }}", {
         method: 'POST',
         headers: {
@@ -474,11 +538,11 @@ $(document).ready(function() {
             periodoConsulta: "Enero - Abril",
             nombreGrafica: "Comparativa de Bajas",
             descripcionGrafica: "Comparación por semestre",
-            imagenGrafica: base64Image, // aquí ahora está correcto
+            imagenGrafica: base64Image,
         }),
     })
     .then(response => {
-        if (!response.ok) return response.json().then(err => { throw new Error(err.detalle); });
+        if (!response.ok) return response.json().then(err => { throw new Error(err.detalle || 'Error al generar el PDF'); });
         return response.blob();
     })
     .then(blob => {
@@ -489,7 +553,7 @@ $(document).ready(function() {
         a.click();
         window.URL.revokeObjectURL(url);
 
-        // Aquí va el SweetAlert2
+        // Notificación de éxito
         Swal.fire({
             title: '¡PDF descargado!',
             text: 'El reporte se descargó correctamente.',
@@ -497,7 +561,18 @@ $(document).ready(function() {
             confirmButtonText: 'Aceptar'
         });
     })
+    .catch(error => {
+        // Notificación de error
+        Swal.fire({
+            title: 'Error',
+            text: error.message || 'No se pudo generar el archivo PDF',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
+        console.error('Error:', error);
+    });
 });
+
 
     
 //------------------------------------------------------------------------------------------------------------------------------
@@ -677,52 +752,39 @@ $(document).ready(function() {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function (respuesta) {
-                    $('#mensaje').text(respuesta.mensaje);
-                },
-                error: function () {
-                    $('#mensaje').text("Error al guardar los datos");
-                }
-        })
-    
-    console.log('JSON generado:', JSON.stringify(resultados, null, 2));
-    
-    // Actualizar tabla externa
-    //const tablaBody = $('#resultadosFinalesTable tbody');
-    //tablaBody.empty();    
-    
-    //resultados.forEach(item => {
-    //    tablaBody.append(`
-    //        <tr>
-    //            <td>${item.entrada}</td>
-    //            <td>${item.mejor_coincidencia}</td>
-    //        </tr>
-    //    `);
-    //});
-    
-    // Mostrar el contenedor de resultados
-    $('#resultadosContainer').show();
-    
-    // Mostrar notificación con SweetAlert2
-    Swal.fire({
-        title: '¡Datos guardados!',
-        text: 'Los resultados se han guardado correctamente',
-        icon: 'success',
-        confirmButtonText: 'Aceptar'
-    }).then((result) => {
-        // Cerrar el modal clic en Aceptar BUG"
-        if (result.isConfirmed) {
-            $('#uploadFile').modal('hide');
+            $('#mensaje').text(respuesta.mensaje);
             
-            // mensaje en el contenedor principal
-            $('#ajaxMessages').html(`
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    Los datos han sido procesados(Normalizados) y guardados exitosamente.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            `);
-            location.reload();
+            // Mostrar notificación con SweetAlert2 (incluyendo el mensaje)
+            Swal.fire({
+                title: '¡Datos guardados!',
+                text: respuesta.mensaje, // Usa el mensaje de la respuesta
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#uploadFile').modal('hide');
+                    $('#ajaxMessages').html(`
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            ${respuesta.mensaje} <!-- Mismo mensaje aquí -->
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `);
+                    location.reload();
+                }
+            });
+        },
+            error: function () {
+            $('#mensaje').text("Error al guardar los datos");
+            
+            // Mostrar error en SweetAlert2
+            Swal.fire({
+                title: 'Error',
+                text: "Error al guardar los datos",
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });
         }
-    });
+    })
 });
 
 //----------------------------------------------------------------------------------------------------------------------------

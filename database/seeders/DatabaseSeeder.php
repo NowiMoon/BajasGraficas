@@ -8,17 +8,20 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        User::factory()->create([
+            'name' => 'Coordinador',
+            'clave_usuario' => 324278,
+            'user_type' => 2,
+            'password' => bcrypt('127'),
+            'status' => true,
+        ]);
 
         User::factory()->create([
-            'name' => 'Karly',
-            'clave_usuario' => 127,
-            'user_type' => 2,
+            'name' => 'Trabajador',
+            'clave_usuario' => 12345678,
+            'user_type' => 3,
             'password' => bcrypt('127'),
             'status' => true,
         ]);

@@ -166,7 +166,7 @@ class GraficoController extends Controller
                     $registros->where('Mat_1', $materia);}
                 if ($escuela !== 'todas') {
                     $registros->where('Escuela', $escuela);}
-                if ($baja !== 'todas') {
+                if ($carrera !== 'todas') {
                     $registros->where('Carrera', $carrera);}
                 if ($tipoTitulacion !== 'todas') {
                     $registros->where('Titulacion', $tipoTitulacion);}
@@ -197,7 +197,7 @@ class GraficoController extends Controller
                     $registros->where('Tbaja', $baja);}
                 if ($escuela !== 'todas') {
                     $registros->where('Escuela', $escuela);}
-                if ($baja !== 'todas') {
+                if ($carrera !== 'todas') {
                     $registros->where('Carrera', $carrera);}
                 if ($tipoTitulacion !== 'todas') {
                     $registros->where('Titulacion', $tipoTitulacion);}
