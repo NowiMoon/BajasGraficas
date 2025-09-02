@@ -25,8 +25,9 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'clave_usuario' => Str::random(10),
-            'user_type' => 3,
+            //'clave_usuario' => Str::random(10),
+            'clave_usuario' => fake()->numberBetween(1000000000, 9999999999),
+            'user_type' => 1,
             'status' => true,
             'password' => static::$password ??= Hash::make('password'),
         ];

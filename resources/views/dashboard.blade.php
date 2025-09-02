@@ -528,6 +528,17 @@ $(document).ready(function() {
         return;
     }
 
+    // Mostrar mensaje de "Generando reporte" después de verificar que hay datos
+    Swal.fire({
+        title: 'Generando reporte',
+        text: 'Se está generando su reporte, por favor espere...',
+        icon: 'info',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
     fetch("{{ route('downloadPDF') }}", {
         method: 'POST',
         headers: {
@@ -546,6 +557,10 @@ $(document).ready(function() {
         return response.blob();
     })
     .then(blob => {
+
+        // Cerrar el mensaje de "Generando reporte"
+        Swal.close();
+
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -563,6 +578,9 @@ $(document).ready(function() {
     })
     .catch(error => {
         // Notificación de error
+        // Cerrar el mensaje de "Generando reporte"
+        Swal.close();
+
         Swal.fire({
             title: 'Error',
             text: error.message || 'No se pudo generar el archivo PDF',

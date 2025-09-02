@@ -4,70 +4,104 @@
     <title>Formato de Reporte de Gráficas UASLP</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            font-family: "Times New Roman", Georgia, serif;
+            width: 18cm;              
+            margin: 0 auto;       
+            padding: 2cm 1.5cm;      
+            background: #fff;
         }
+
         .header {
             text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
             margin-bottom: 20px;
         }
         .header h1 {
             font-size: 18px;
             margin: 5px 0;
         }
+
         .date-section {
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
         }
-        .date-field {
-            border-bottom: 1px solid #000;
+        .date-section > div {
             width: 30%;
-            padding: 5px 0;
         }
+        .date-field {
+            border: 1px solid #000;
+            border-radius: 5px;
+            padding: 6px;
+            background-color: #f2f2f2;
+            text-align: center;
+            font-weight: bold;
+            min-height: 20px;
+        }
+
         .chart-section {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         .chart-name {
-            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
         }
         .chart-container {
-            border: 1px solid #000;
-            height: 300px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            padding: 10px;
+            background: #fff;
+            height: 10cm; 
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
-            background-color: #f9f9f9;
         }
+        .chart-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
         .description-section {
             margin-bottom: 20px;
         }
         .description-field {
-            width: 100%;
-            border-bottom: 1px solid #000;
-            height: 40px;
+            border: 1px solid #000;
+            border-radius: 5px;
+            padding: 10px;
+            min-height: 2cm;
+            background-color: #fafafa;
         }
+
         .user-section {
             margin-bottom: 20px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 10px;
         }
         th, td {
+            border: 1px solid #000;
             padding: 8px;
-            text-align: left;
+            text-align: center;
         }
-        td {
-            border-bottom: 1px solid #000;
+        th {
+            background: #f0f0f0;
+            font-weight: bold;
         }
+
         .footer {
-            font-size: 12px;
+            font-size: 11px;
             font-style: italic;
             text-align: center;
+            color: #555;
+            border-top: 1px solid #aaa;
+            margin-top: 30px;
+            padding-top: 5px;
         }
     </style>
 </head>
@@ -93,15 +127,6 @@
         </div>
     </div>
 
-    <!--<div class="chart-section">
-        <div class="chart-name">
-            <label>Nombre de la Gráfica</label>
-            <div class="date-field" id="nombreGrafica">{{ $nombreGrafica ?? '' }}</div>
-        </div>
-        <div class="chart-container">
-            GRÁFICA AQUÍ
-        </div>
-    </div>-->
     <div class="chart-section">
         <div class="chart-name">
             <label>Nombre de la Gráfica</label>
@@ -109,7 +134,7 @@
         </div>
         <div class="chart-container">
             @if(!empty($imagenGrafica))
-                <img src="{{ $imagenGrafica }}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                <img src="{{ $imagenGrafica }}" />
             @else
                 <span>No se encontró la imagen de la gráfica</span>
             @endif
@@ -129,7 +154,7 @@
                 <th>Rol del usuario</th>
             </tr>
             <tr>
-                <td id="nombreUsuario">{{ $nombreUsuario ?? '' }}<</td>
+                <td id="nombreUsuario">{{ $nombreUsuario ?? '' }}</td>
                 <td id="rolUsuario">{{ $rolUsuario ?? '' }}</td>
             </tr>
         </table>
