@@ -54,15 +54,20 @@
             box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
             padding: 10px;
             background: #fff;
-            height: 10cm; 
+            height: 12cm; 
+            width: 17cm;
             display: flex;
             justify-content: center;
             align-items: center;
+            margin: 0 auto;
         }
-        .chart-container img {
+        .chart-container img, .chart-container span {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            text-align: center;
+            width: 100%;
+            height: 100%;
         }
 
         .description-section {
