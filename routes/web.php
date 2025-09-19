@@ -19,6 +19,8 @@ Route::get('/', function () {
             return redirect()->route('dashboard');
         } elseif (Auth::User()->hasRole('coordinador')) {
             return redirect()->route('dashboard');
+        } elseif (Auth::User()->hasRole('trabajador')) {
+            return redirect()->route('dashboard');
         }
         // Otros roles si aplica
     }

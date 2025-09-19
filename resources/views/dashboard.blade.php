@@ -1,29 +1,39 @@
 @extends('layouts.app')
 @section('content')
 
-<div style="display: flex;">
-    <div class="d-flex flex-column bg-secondary bg-opacity-10 align-items-center justify-content-evenly"
-         style="width: 80px; z-index: 1000; position: fixed; top: 80px; left: 0; height: calc(100vh - 80px);">
-        @if ( Auth::user()->user_type == 1 )
-        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href="{{ route('register') }}"><img src="{{ asset('images/users_icon.svg') }}" alt="Usuarios">Gestion de Usuarios</a>
-        <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
-        @endif
-        @if ( Auth::user()->user_type == 2 )
-        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href=" {{ route('gestion_materias') }} "><img src="{{ asset('images/uploadSubjects_icon.svg') }}" alt="Subir materias">Subir materias</a>
-        <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
-        <a class="d-block icon-item text-center" style="text-decoration: none; color: black;"><img src="{{ asset('images/addData_icon.svg') }}" alt="Upload file" data-bs-toggle="modal" data-bs-target="#uploadFile" style="display: block; margin: 0 auto;">Subir datos</a>
-        <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
-        @endif
-        <!--<a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href="{{ route('downloadPDF') }}"><img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics" style="display: block; margin: 0 auto;">Generar Reporte</a>-->
-        <button id="btnDownloadPDF" style="background:none; border:none; cursor:pointer; color:black; text-align:center;">
-            <img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics" style="display: block; margin: 0 auto;">
-            Generar Reporte
-        </button>
-    </div>
-    <div style="margin-left: 80px; margin-top: 80px; width: 100%;">
-        <div class="container">
-            @yield('content')
-        </div>
+<div class="container-fluid px-0">
+    <div class="row gx-0">
+        <!-- Sidebar -->
+        <nav class="col-auto d-none d-md-flex flex-column bg-secondary bg-opacity-10 align-items-center justify-content-evenly"
+             style="width: 80px; z-index: 1000; position: fixed; top: 80px; left: 0; height: calc(100vh - 80px);">
+            @if ( Auth::user()->user_type == 1 )
+            <a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href="{{ route('register') }}">
+                <img src="{{ asset('images/users_icon.svg') }}" alt="Usuarios">Gestion de Usuarios
+            </a>
+            <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
+            @endif
+            @if ( Auth::user()->user_type == 2 )
+            <a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href=" {{ route('gestion_materias') }} ">
+                <img src="{{ asset('images/uploadSubjects_icon.svg') }}" alt="Subir materias">Subir materias
+            </a>
+            <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
+            <a class="d-block icon-item text-center" style="text-decoration: none; color: black;">
+                <img src="{{ asset('images/addData_icon.svg') }}" alt="Upload file" data-bs-toggle="modal" data-bs-target="#uploadFile" style="display: block; margin: 0 auto;">
+                Subir datos
+            </a>
+            <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
+            @endif
+            <button id="btnDownloadPDF" style="background:none; border:none; cursor:pointer; color:black; text-align:center;">
+                <img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics" style="display: block; margin: 0 auto;">
+                Generar Reporte
+            </button>
+        </nav>
+        <!-- Contenido principal -->
+        <main class="col-md-10 offset-md-1 col-12" style="margin-top: 80px;">
+            <div class="container">
+                @yield('content')
+            </div>
+        </main>
     </div>
 </div>
 
@@ -37,7 +47,7 @@
         <div id="ajaxMessages" class="mt-3"></div>
         <!-- TABLA CON RESULTADOS REALES -->
         <!-- Contenedor para resultados - Fuera del modal -->
-        <div class="container mt-4 pt-4" id="resultadosContainer"> <!--style="display: none;"-->
+        <div class="container mt-4 pt-4 ms-5" id="resultadosContainer"> <!--style="display: none;"-->
             <div class="card shadow-sm">
                 <div class="card-header text-white" style="background-color: #004A98;">
                     <h3 class="card-title mb-0">Datos</h3>

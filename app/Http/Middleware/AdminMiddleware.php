@@ -20,6 +20,7 @@ class AdminMiddleware
             return $next($request);
         }
 
-        return redirect('/login')->with('error', 'No tienes permisos de administrador');
+        // Return 403 Forbidden instead of redirect
+        abort(403, 'No tienes permisos de administrador');
     }
 }
