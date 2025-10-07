@@ -14,10 +14,12 @@ class RecibirJsonController extends Controller
     public function recibirJson($umbral)
     {
         try {
+            Log::info('estoy dentro');
             $Datos_Nuevos = [];
             $rutaArchivo = 'json/lista.json';
 
             if (!Storage::exists($rutaArchivo)) {
+                Log::info('error al leer json');
                 return response()->json([
                     'success' => false,
                     'message' => 'Archivo lista.json no encontrado'
@@ -28,6 +30,7 @@ class RecibirJsonController extends Controller
             $datos = json_decode($json, true);
 
             if (!isset($datos[0])) {
+                Log::info($datos);
                 return response()->json([
                     'success' => false,
                     'message' => 'Datos en formato incorrecto'
@@ -57,6 +60,8 @@ class RecibirJsonController extends Controller
                     }
                 }
             }
+
+            Log::info('recibir jason');
 
             $json = json_encode($datos, JSON_PRETTY_PRINT);
             $ruta = 'json/lista_sin_duplicados.json';
@@ -126,6 +131,7 @@ class RecibirJsonController extends Controller
             return $this->guardar_datos($Datos_Nuevos);
 
         } catch (\Exception $e) {
+            Log::info('error');
             return response()->json([
                 'success' => false,
                 'message' => 'Error en el servidor',

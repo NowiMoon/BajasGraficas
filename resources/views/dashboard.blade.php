@@ -320,7 +320,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- SweetAlert2 para popups bonitos -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- Tal vez sirva para los porcentajes -->
+<!-- Tal vez sirva para los porcentajes (si sirvio :D)-->
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
 <script>

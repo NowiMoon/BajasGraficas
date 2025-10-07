@@ -15,27 +15,21 @@
         }
 
         .header-banner {
-    background-color: #004A98;
-    color: white;
-    padding: 10px 20px;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* <-- clave para ponerlas a los lados */
-}
+            background-color: #004A98;
+            color: white;
+            padding: 15px 0; /* Aumenté el padding vertical */
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centra el contenido */
+            text-align: center; /* Asegura que el texto esté centrado */
+            width: 100%; /* Ocupa todo el ancho disponible */
+        }
 
         .header-banner img {
-            height: 50px;
-        }
-
-        .header-banner-text {
-            text-align: center;
-        }
-
-        .header-banner-text h1 {
-            font-size: 16px;
-            margin: 0;
-            font-weight: bold;
+            height: 80px; /* Aumenté la altura de la imagen */
+            margin: 0 auto; /* Centra la imagen */
+            display: block;
         }
 
         .header {
@@ -161,17 +155,8 @@
 </head>
 <body class="compact-layout">
     <!-- Banner azul con logo UASLP -->
-     <div class="header-banner">
-        <!-- Imagen a la izquierda -->
-        <img src="images/UASLP.png" alt="Logo UASLP" style="height: 60px;">
-
-        <!-- Imagen a la derecha -->
-        <img src="images/ingenieria_logoo.png" alt="Logo Derecho" style="height: 60px;">
-
-        <!-- Texto en el centro -->
-        <div class="header-banner-text">
-            <h1>Área de ciencias de la computación</h1>
-        </div>
+    <div class="header-banner">
+        <img src="images/banner.png" alt="Logo UASLP">
     </div>
 
 

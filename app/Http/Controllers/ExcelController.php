@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Materia;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\File;
@@ -77,11 +78,12 @@ class ExcelController extends Controller
 
     public function upload(Request $request)
     {
+        mb_internal_encoding('UTF-8');
         // Validamos que se haya subido un archivo
         $request->validate([
             'file' => 'required|file|max:2048', // Solo verifica que sea un archivo (no el tipo)
         ]);
-        //dd('El método upload se está ejecutando.');
+        Log::info('el archivo entro');
         // Obtenemos el archivo subido
         $file = $request->file('file');
 
@@ -119,6 +121,7 @@ class ExcelController extends Controller
 
         if($columnCount != 17 & $columnCount != 20)
         {
+            Log::info('no cumple con las columnas esperadas');
             return back()->withErrors(['file' => 'Archivo no aceptado: ' . 'no cuenta con las columnas esperadas']);
         }
         
@@ -201,6 +204,13 @@ class ExcelController extends Controller
             return substr($valor, 0, 30);
         }, $c_materias);
 
+        $titulaciones = collect($c_titulacion)->map(function ($item) {
+            if (strtolower($item) === 'egel') {
+                return 'Examen General de Egreso de la Licenciatura (EGEL)';
+            }
+            return $item;
+        })->toArray();
+
         $baja_minusculas = array_map('strtolower', $c_baja);
 
         $c_id_anio = $this->ObtenFecha($fechas,$columnCount,$c_generacion);
@@ -216,7 +226,7 @@ class ExcelController extends Controller
         $DATOS[] = $baja_minusculas;
         $DATOS[] = $c_inconveniente;
         $DATOS[] = $c_trabajos;
-        $DATOS[] = $c_titulacion;
+        $DATOS[] = $titulaciones;
         $DATOS[] = $c_mat2;
         $DATOS[] = $c_mat3;
 
@@ -243,11 +253,99 @@ class ExcelController extends Controller
             return back()->withErrors(['file' => $errorMessage]);
         }
 
-        $json = json_encode($DATOS, JSON_PRETTY_PRINT);
-        $rutaArchivo = 'json/lista.json';
-        Storage::put($rutaArchivo, $json);
- 
+        Log::info('=== DEBUG process17Columns ===');
+        Log::info('DATOS recibido:', ['count' => is_countable($DATOS) ? count($DATOS) : 'No contable']);
+
+        // LIMPIAR DATOS ANTES de json_encode
+        $DATOS = $this->limpiarYRepararUtf8($DATOS);
+
+        // DEBUG: Verificar después de limpiar
+        Log::info('Después de limpieza - Primer elemento:', isset($DATOS[0]) ? $DATOS[0] : 'No hay elemento 0');
+
+        $json = json_encode($DATOS, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        
+        if ($json === false) {
+            Log::error('Error json_encode después de limpieza:', ['error' => json_last_error_msg()]);
+            
+            // Fallback: intentar con opciones más permisivas
+            $json = json_encode($DATOS, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_IGNORE);
+            
+            if ($json === false) {
+                Log::error('Fallback también falló');
+                return back()->withErrors(['file' => 'Error al convertir datos a JSON']);
+            }
+        }
+
+        $rutaCompleta = storage_path('app/private/json/lista.json');
+        $directorio = dirname($rutaCompleta);
+        
+        if (!File::exists($directorio)) {
+            File::makeDirectory($directorio, 0755, true);
+        }
+        
+        $resultado = File::put($rutaCompleta, $json);
+        
+        Log::info('File::put resultado:', [
+            'éxito' => $resultado !== false,
+            'bytes_escritos' => $resultado,
+            'ruta' => $rutaCompleta
+        ]);
+
+        if ($resultado === false) {
+            return back()->withErrors(['file' => 'No se pudo escribir el archivo']);
+        }
+
+        Log::info('17 columnas - Archivo guardado exitosamente');
         return app('App\Http\Controllers\RecibirJsonController')->recibirJson($umbral);
+    }
+
+    private function limpiarYRepararUtf8($datos)
+    {
+        if (is_array($datos)) {
+            foreach ($datos as $clave => $valor) {
+                $datos[$clave] = $this->limpiarYRepararUtf8($valor);
+            }
+            return $datos;
+        } elseif (is_string($datos)) {
+            return $this->limpiarCadenaUtf8($datos);
+        } else {
+            return $datos;
+        }
+    }
+
+    private function limpiarCadenaUtf8($cadena)
+    {
+        // 1. Reemplazos específicos que ya identificaste
+        $reemplazos = [
+            "programaci�" => "programación",
+            "introducci�" => "introducción",
+            "administraci�" => "administración",
+            "comunicaci�" => "comunicación",
+            "educaci�" => "educación",
+            "gesti�" => "gestión",
+            "organizaci�" => "organización",
+            "producci�" => "producción",
+            "direcci�" => "dirección",
+            "secci�" => "sección",
+        ];
+        
+        foreach ($reemplazos as $problema => $solucion) {
+            $cadena = str_replace($problema, $solucion, $cadena);
+        }
+        
+        // 2. Limpieza general de caracteres UTF-8 inválidos
+        if (!mb_check_encoding($cadena, 'UTF-8')) {
+            // Enfoque conservador - eliminar solo caracteres realmente inválidos
+            $cadena = preg_replace('/[^\x{0009}\x{000A}\x{000D}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', $cadena);
+            
+            // Si aún hay problemas, usar mb_convert_encoding
+            $cadena = mb_convert_encoding($cadena, 'UTF-8', 'UTF-8');
+        }
+        
+        // 3. Eliminar cualquier carácter � residual
+        $cadena = str_replace("�", "", $cadena);
+        
+        return $cadena;
     }
     
     private function process20Columns($headers,$DATOS,$umbral)
@@ -264,6 +362,7 @@ class ExcelController extends Controller
         $json = json_encode($DATOS, JSON_PRETTY_PRINT);
         $rutaArchivo = 'json/lista.json';
         Storage::put($rutaArchivo, $json);
+        Log::info('20 columnas');
  
         return app('App\Http\Controllers\RecibirJsonController')->recibirJson($umbral);
     }

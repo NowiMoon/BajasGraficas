@@ -33,4 +33,13 @@ class BotonesController extends Controller
             ->values()
             ->all());
         }
+
+        public function generacion()
+        {
+            return response()->json(Alumno::whereNotNull('Gen')
+            ->pluck('Gen')
+            ->unique()
+            ->values()
+            ->all());
+        }
 }
