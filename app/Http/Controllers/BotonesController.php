@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Alumno;
-
+use Illuminate\Support\Facades\Log;
 class BotonesController extends Controller
 {
         public function materias()
@@ -34,12 +34,17 @@ class BotonesController extends Controller
             ->all());
         }
 
-        public function generacion()
+        public function generation()  // ✅ CORRECTO: función separada
         {
-            return response()->json(Alumno::whereNotNull('Gen')
-            ->pluck('Gen')
-            ->unique()
-            ->values()
-            ->all());
+            $generaciones = Alumno::whereNotNull('Gen')
+                ->pluck('Gen')
+                ->unique()
+                ->values()
+                ->all();
+            
+            // Log para debug
+            Log::info('Generaciones encontradas:', $generaciones);
+            
+            return response()->json($generaciones);
         }
-}
+    }

@@ -42,195 +42,335 @@
     <!-- Sidebar -->`
     
     <!-- Contenido principal INGRESAR AQUI LO QUE FALTE DE DASHBOARD -->
-    <div class="container flex-grow-1 col-11 mx-auto mt-10">
+    <div class="container flex-grow-1 col-11 mx-auto mt-3">
         <!-- Contenedor para mensajes AJAX -->
         <div id="ajaxMessages" class="mt-3"></div>
+        
         <!-- TABLA CON RESULTADOS REALES -->
         <!-- Contenedor para resultados - Fuera del modal -->
-        <div class="container mt-4 pt-4 ms-5" id="resultadosContainer"> <!--style="display: none;"-->
+        <div class="container-fluid mt-2 pt-2 px-0" id="resultadosContainer">
             <div class="card shadow-sm">
+                <!-- TÍTULO CAMBIADO: Generador de Gráfica -->
                 <div class="card-header text-white" style="background-color: #004A98;">
-                    <h3 class="card-title mb-0">Datos</h3>
+                    <h3 class="card-title mb-0">Generador de Gráficas</h3>
                 </div>
+                
+                <!-- NUEVA ESTRUCTURA: Controles (1/4) y gráfica (3/4) -->
+                <div class="card-body p-3">
+                    <div class="row g-3">
+                        <!-- Columna izquierda - Controles (1/4) -->
+                        <div class="col-md-3">
+                            <div class="d-flex flex-column gap-2">
+                                <!-- Sección Tipo de Gráfica -->
+                                <div class="mb-2">
+                                    <label class="form-label mb-1 fw-semibold small">Tipo de gráfica:</label>
+                                    <select class="form-select form-select-sm" id="tipoGrafica">
+                                        <option value="pie">Gráfica de Pie</option>
+                                        <option value="doughnut">Gráfica de Dona</option>
+                                        <option value="bar">Gráfica de Barras</option>
+                                        <option value="line">Gráfica de Líneas</option>
+                                    </select>
+                                </div>
+
+                                <!-- Sección Tipo de Baja con checkbox -->
+                                <div class="mb-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filtro-unico" type="checkbox" id="bajaCheckbox">
+                                        <label class="form-check-label fw-semibold small" for="bajaCheckbox">Tipo de baja:</label>
+                                    </div>
+                                    <select class="form-select form-select-sm mt-1" id="baja">
+                                        <option value="todas">Todas</option>
+                                        <option value="Trámite de Pasantía">Trámite de Pasantía</option>
+                                        <option value="Baja Temporal o Definitiva">Baja Temporal o Definitiva</option>
+                                        <option value="Cambio de Carrera">Cambio de Carrera</option>
+                                    </select>
+                                </div>
+
+                                <!-- Sección Generación -->
+                                <div class="mb-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filtro-unico" type="checkbox" id="generacion">
+                                        <label class="form-check-label fw-semibold small" for="generacion">Generación:</label>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-1 mt-1">
+                                        <select class="form-select form-select-sm" id="anio_1" style="width: 80px;">
+                                            <option value="" disabled selected>Desde</option>
+                                        </select>
+                                        <span class="small fw-semibold">a</span>
+                                        <select class="form-select form-select-sm" id="anio_2" style="width: 80px;">
+                                            <option value="" disabled selected>Hasta</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Sección Carrera con checkbox -->
+                                <div class="mb-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filtro-unico" type="checkbox" id="carreraCheckbox">
+                                        <label class="form-check-label fw-semibold small" for="carreraCheckbox">Carrera:</label>
+                                    </div>
+                                    <select class="form-select form-select-sm mt-1" id="Carrera">
+                                        <option value="todas">Todas</option>
+                                        <option value="Ingeniero en Computación">Ingeniero en Computación</option>
+                                        <option value="Ingeniero en Sistemas Inteligentes">Ingeniero en Sistemas Inteligentes</option>
+                                        <option value="Ingeniero en Informática">Ingeniero en Informática</option>
+                                    </select>
+                                </div>
+
+                                <!-- Sección Escuela con checkbox -->
+                                <div class="mb-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filtro-unico" type="checkbox" id="escuelaCheckbox">
+                                        <label class="form-check-label fw-semibold small" for="escuelaCheckbox">Escuela:</label>
+                                    </div>
+                                    <select class="form-select form-select-sm mt-1" id="escuela">
+                                        <option value="todas">Todas</option>
+                                    </select>
+                                </div>
+
+                                <!-- Sección Materias Dificiles con checkbox -->
+                                <div class="mb-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filtro-unico" type="checkbox" id="materiaCheckbox">
+                                        <label class="form-check-label fw-semibold small" for="materiaCheckbox">Materia difícil:</label>
+                                    </div>
+                                    <select class="form-select form-select-sm mt-1" id="materia">
+                                        <option value="todas">Todas</option>
+                                    </select>
+                                </div>
+
+                                <!-- Sección Tipo de titulación con checkbox -->
+                                <div class="mb-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filtro-unico" type="checkbox" id="titulacionCheckbox">
+                                        <label class="form-check-label fw-semibold small" for="titulacionCheckbox">Tipo de titulación:</label>
+                                    </div>
+                                    <select class="form-select form-select-sm mt-1" id="tipo_titulacion">
+                                        <option value="todas">Todas</option>
+                                        <option value="Trabajo recepcional">Trabajo recepcional</option>
+                                        <option value="Trabajo por excelencia">Trabajo por excelencia</option>
+                                        <option value="Trabajo colectivo">Trabajo colectivo</option>
+                                        <option value="Memorias de actividad profesional">Memorias de actividad profesional</option>
+                                        <option value="Examen General de Conocimientos">Examen General de Conocimientos</option>
+                                        <option value="Curso de opción a No trabajo recepcional (Diplomado)">Curso de opción a No trabajo recepcional (Diplomado)</option>
+                                        <option value="Un semestre de maestría">Un semestre de maestría</option>
+                                        <option value="Dos semestres de maestría">Dos semestres de maestría</option>
+                                        <option value="Exención de Examen Promedio mayor a 9">Exención de Examen Promedio mayor a 9</option>
+                                        <option value="Examen General de Egreso de la Licenciatura (EGEL)">Examen General de Egreso de la Licenciatura (EGEL)</option>
+                                        <option value="Por artículo científico">Por artículo científico</option>
+                                        <option value="Ninguna">Ninguna</option>
+                                    </select>
+                                </div>
+
+                                <!-- Sección Trabajo con checkbox -->
+                                <div class="mb-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filtro-unico" type="checkbox" id="trabajoCheckbox">
+                                        <label class="form-check-label fw-semibold small" for="trabajoCheckbox">Lugar donde labura:</label>
+                                    </div>
+                                    <select class="form-select form-select-sm mt-1" id="trabajo">
+                                        <option value="todas">Todas</option>
+                                    </select>
+                                </div>
+
+                                <!-- Botón y mensaje -->
+                                <div class="mt-2">
+                                    <button class="btn btn-success btn-sm w-100 fw-semibold" id="generarGraficaBtn">
+                                        <i class="fas fa-chart-bar me-1"></i>Generar Gráfica
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm w-100 fw-semibold mt-1" id="limpiarFiltrosBtn">
+                                        <i class="fas fa-times me-1"></i>Limpiar Filtros
+                                    </button>
+                                    <p id="mensaje" class="small text-muted mt-1 mb-0"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna derecha - Gráfica (3/4) - MÁS GRANDE Y CENTRADA -->
+                        <div class="col-md-9">
+                            <div id="chartContainer" style="display: none; width: 100%; height: 70vh; position: relative;">
+                                <div class="d-flex justify-content-center align-items-center h-100">
+                                    <canvas id="dataChart" style="max-width: 100%; max-height: 100%;"></canvas>
+                                </div>
+                            </div>
+                            <div id="noChartMessage" class="text-center text-muted" style="height: 70vh; background-color: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                <div>
+                                    <i class="fas fa-chart-pie fa-3x mb-3" style="color: #dee2e6;"></i>
+                                    <p class="mb-0 small">La gráfica se mostrará aquí después de generar los datos</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TÍTULO: Datos de Alumnos Registrados -->
+                <div class="card-header text-white mt-3" style="background-color: #004A98;">
+                    <h3 class="card-title mb-0">Datos de Alumnos Registrados</h3>
+                </div>
+
+                <!-- TABLA - Ahora está debajo de los controles y gráfica -->
                 <div class="card-body p-0">
                     <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                        <table class="table table-bordered table-striped table-hover mb-0" id="resultadosFinalesTable">
-                            <thead class="table-dark sticky-top" style="top: 0;">
+                        <table class="table table-hover table-striped mb-0" id="resultadosFinalesTable" style="border-collapse: separate; border-spacing: 0;">
+                            <thead class="sticky-top" style="top: 0;">
                                 <tr>
-                                    <th style="width: 4%; background-color: #00B2E3">Id</th>
-                                    <th style="width: 4%; background-color: #00B2E3">Año</th>
-                                    <th style="width: 4%; background-color: #00B2E3">Id Reg</th>
-                                    <th style="width: 5%; background-color: #00B2E3">Clave</th>
-                                    <th style="width: 8%; background-color: #00B2E3">Nombre</th>
-                                    <th style="width: 5%; background-color: #00B2E3">Generación</th>
-                                    <th style="width: 8%; background-color: #00B2E3">Carrera</th>
-                                    <th style="width: 5%; background-color: #00B2E3">Email</th>
-                                    <th style="width: 5%; background-color: #00B2E3">Mat1</th>
-                                    <th style="width: 5%; background-color: #00B2E3">Mat2</th>
-                                    <th style="width: 5%; background-color: #00B2E3">Mat3</th>
-                                    <th style="width: 5%; background-color: #00B2E3">Escuela</th>
-                                    <th style="width: 5%; background-color: #00B2E3">Tipo Baja</th>
-                                    <th style="width: 5%; background-color: #00B2E3">Inconveniente</th>
-                                    <th style="width: 5%; background-color: #00B2E3">Empresa</th>
-                                    <th style="width: 5%; background-color: #00B2E3">Titulación</th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Id</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Año</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Id Reg</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Clave</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Nombre</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Generación</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Carrera</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Email</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Mat1</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Mat2</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Mat3</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Escuela</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Tipo Baja</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Inconveniente</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none; border-right: 1px solid rgba(255,255,255,0.3);">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Empresa</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none;">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Titulación</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($alumnos as $alumno)
-                                    <tr>
-                                        <td>{{ $alumno->Id_Registro }}</td>
-                                        <td>{{ $alumno->Anio }}</td>
-                                        <td>{{ $alumno->Id_Reg_A }}</td>
-                                        <td>{{ $alumno->Cv_Alumno }}</td>
-                                        <td>{{ $alumno->Nombre_Alumno }}</td>
-                                        <td>{{ $alumno->Gen }}</td>
-                                        <td>{{ $alumno->Carrera }}</td>
-                                        <td>{{ $alumno->email }}</td>
-                                        <td>{{ $alumno->Mat_1 }}</td>
-                                        <td>{{ $alumno->Mat_2 }}</td>
-                                        <td>{{ $alumno->Mat_3 }}</td>
-                                        <td>{{ $alumno->Escuela }}</td>
-                                        <td>{{ $alumno->TBaja }}</td>
-                                        <td>{{ $alumno->Inc_Carr }}</td>
-                                        <td>{{ $alumno->Empresa }}</td>
-                                        <td>{{ $alumno->Titulacion }}</td>
+                                    <tr style="transition: all 0.2s ease; border-bottom: 1px solid #e9ecef;">
+                                        <td class="fw-medium text-center" style="padding: 10px 8px; font-size: 0.8rem; background-color: #f8f9fa; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Id_Registro }}
+                                        </td>
+                                        <td class="text-center" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Anio }}
+                                        </td>
+                                        <td class="fw-medium text-center" style="padding: 10px 8px; font-size: 0.8rem; background-color: #f8f9fa; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Id_Reg_A }}
+                                        </td>
+                                        <td class="text-primary fw-bold text-center" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Cv_Alumno }}
+                                        </td>
+                                        <td class="fw-semibold" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Nombre_Alumno }}
+                                        </td>
+                                        <td class="text-center" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Gen }}
+                                        </td>
+                                        <td class="fw-medium" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Carrera }}
+                                        </td>
+                                        <td class="text-truncate" style="padding: 10px 8px; font-size: 0.8rem; max-width: 150px; border-right: 1px solid #e9ecef;" title="{{ $alumno->email }}">
+                                            {{ $alumno->email }}
+                                        </td>
+                                        <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Mat_1 }}
+                                        </td>
+                                        <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Mat_2 }}
+                                        </td>
+                                        <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Mat_3 }}
+                                        </td>
+                                        <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Escuela }}
+                                        </td>
+                                        <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->TBaja }}
+                                        </td>
+                                        <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Inc_Carr }}
+                                        </td>
+                                        <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            {{ $alumno->Empresa }}
+                                        </td>
+                                        <td style="padding: 10px 8px; font-size: 0.8rem;">
+                                            {{ $alumno->Titulacion }}
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
                 </div>
-            <div class="card-footer text-end">
-                <!-- Footer vacío -->
-                <!-- Botones movidos debajo de la tabla y centrados -->
-                <p id="mensaje"></p>
-
-                <div class="card-footer text-end">
-                <div class="d-flex flex-wrap align-items-center p-3">
-                    <!-- Primera fila de opciones -->
-                    <div class="d-flex flex-wrap align-items-center justify-content-center gap-4 mb-3">
-                        <!-- Sección Tipo de Gráfica (sin checkbox) -->
-                            <div class="d-flex align-items-center gap-2">
-                                <label class="form-label mb-0">Tipo de gráfica:</label>
-                                <select class="form-select" id="tipoGrafica" style="width: 170px;">
-                                    <option value="pie">Gráfica de Pie</option>
-                                    <option value="doughnut">Gráfica de Dona</option>
-                                    <option value="bar">Gráfica de Barras</option>
-                                    <option value="line">Gráfica de Líneas</option>
-                                </select>
-                            </div>
-
-                            <!-- Sección Tipo de Baja con checkbox -->
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="form-check">
-                                    <input class="form-check-input filtro-unico" type="checkbox" id="bajaCheckbox">
-                                    <label class="form-check-label" for="bajaCheckbox">Tipo de baja:</label>
-                                </div>
-                                <select class="form-select" id="baja" style="width: 150px;">
-                                    <option value="todas">Todas</option>
-                                    <option value="Trámite de Pasantía">Trámite de Pasantía</option>
-                                    <option value="Baja Temporal o Definitiva">Baja Temporal o Definitiva</option>
-                                    <option value="Cambio de Carrera">Cambio de Carrera</option>
-                                </select>
-                            </div>
-
-                            <!-- Sección Generación (ya tiene checkbox) -->
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="form-check">
-                                    <input class="form-check-input filtro-unico" type="checkbox" id="generacion">
-                                    <label class="form-check-label" for="generacion">Generación:</label>
-                                </div>
-                                <input type="text" class="form-control" id="anio_1" style="width: 70px;">
-                                <span class="mx-1">a</span>
-                                <input type="text" class="form-control" id="anio_2" style="width: 70px;">
-                            </div>
-
-                            <!-- Sección Carrera con checkbox -->
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="form-check">
-                                    <input class="form-check-input filtro-unico" type="checkbox" id="carreraCheckbox" >
-                                      <label class="form-check-label" for="carreraCheckbox">Carrera:</label>
-                                </div>
-                                <select class="form-select" id="Carrera" style="width: 150px;">
-                                    <option value="todas">Todas</option>
-                                    <option value="Ingeniero en Computación">Ingeniero en Computación</option>
-                                    <option value="Ingeniero en Sistemas Inteligentes">Ingeniero en Sistemas Inteligentes</option>
-                                    <option value="Ingeniero en Informática">Ingeniero en Informática</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Segunda fila de opciones -->
-                        <div class="d-flex flex-wrap align-items-center justify-content-center gap-4 mb-3">
-                            <!-- Sección Escuela con checkbox -->
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="form-check">
-                                    <input class="form-check-input filtro-unico" type="checkbox" id="escuelaCheckbox">
-                                    <label class="form-check-label" for="escuelaCheckbox">Escuela de procedencia:</label>
-                                </div>
-                                <select class="form-select" id="escuela" style="width: 170px;">
-                                    <option value="todas">Todas</option>
-                                </select>
-                            </div>
-
-                            <!-- Sección Materias Dificiles con checkbox -->
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="form-check">
-                                    <input class="form-check-input filtro-unico" type="checkbox" id="materiaCheckbox">
-                                    <label class="form-check-label" for="materiaCheckbox">Materia difícil:</label>
-                                </div>
-                                <select class="form-select" id="materia" style="width: 150px;">
-                                    <option value="todas">Todas</option>
-                                </select>
-                            </div>
-
-                            <!-- Sección Tipo de titulación con checkbox -->
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="form-check">
-                                    <input class="form-check-input filtro-unico" type="checkbox" id="titulacionCheckbox">
-                                    <label class="form-check-label" for="titulacionCheckbox">Tipo de titulación:</label>
-                                </div>
-                                <select class="form-select" id="tipo_titulacion" style="width: 150px;">
-                                    <option value="todas">Todas</option>
-                                    <option value="Trabajo recepcional">Trabajo recepcional</option>
-                                    <option value="Trabajo por excelencia">Trabajo por excelencia</option>
-                                    <option value="Trabajo colectivo">Trabajo colectivo</option>
-                                    <option value="Memorias de actividad profesional">Memorias de actividad profesional</option>
-                                    <option value="Examen General de Conocimientos">Examen General de Conocimientos</option>
-                                    <option value="Curso de opción a No trabajo recepcional (Diplomado)">Curso de opción a No trabajo recepcional (Diplomado)</option>
-                                    <option value="Un semestre de maestría">Un semestre de maestría</option>
-                                    <option value="Dos semestres de maestría">Dos semestres de maestría</option>
-                                    <option value="Exención de Examen Promedio mayor a 9">Exención de Examen Promedio mayor a 9</option>
-                                    <option value="Examen General de Egreso de la Licenciatura (EGEL)">Examen General de Egreso de la Licenciatura (EGEL)</option>
-                                    <option value="Por artículo científico">Por artículo científico</option>
-                                    <option value="Ninguna">Ninguna</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="d-flex flex-wrap align-items-center justify-content-center gap-4 mb-3">
-                            <!-- Sección Trabajo con checkbox -->
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="form-check">
-                                    <input class="form-check-input filtro-unico" type="checkbox" id="escuelaCheckbox">
-                                    <label class="form-check-label" for="trabajoCheckbox">Lugar donde labura:</label>
-                                </div>
-                                <select class="form-select" id="trabajo" style="width: 150px;">
-                                    <option value="todas">Todas</option>
-                                </select>
-                            </div>
-                        <button class="btn btn-success ms-3" id="generarGraficaBtn">Generar Gráfica</button>
-                        </div>
-                    </div>
-                </div>
+                <div class="mb-5"></div>
             </div>
-        </div>
-    </div>
-
-<!-- GRÁFICA DE EJEMPLO -->
-    <div class="card-footer text-end">
-        <!-- Agregar contenedor para la gráfica -->
-        <div id="chartContainer" style="display: none; width: 80%; margin: 20px auto;">
-            <canvas id="dataChart"></canvas>
         </div>
     </div>
 
@@ -381,6 +521,57 @@ $(document).ready(function() {
             }
         });
     });
+
+    $.ajax({
+        url: '/api/generaciones',
+        type: 'GET',
+        success: function (data) {
+            const selectDesde = $('#anio_1');
+            const selectHasta = $('#anio_2');
+            
+            // Solo cargar si no hay opciones además de la primera
+            if (selectDesde.find('option').length <= 1) {
+                // Ordenar las generaciones de mayor a menor
+                data.sort((a, b) => b - a);
+                
+                data.forEach(function (generacion) {
+                    selectDesde.append('<option value="' + generacion + '">' + generacion + '</option>');
+                    selectHasta.append('<option value="' + generacion + '">' + generacion + '</option>');
+                });
+            }
+        }
+    });
+
+    // Validación simple para que "Hasta" no sea menor que "Desde"
+    $('#anio_2').on('change', function() {
+        const desde = $('#anio_1').val();
+        const hasta = $(this).val();
+        
+        if (desde && hasta && hasta < desde) {
+            Swal.fire({
+                title: 'Error de rango',
+                text: 'El año "Hasta" no puede ser menor que el año "Desde"',
+                icon: 'warning',
+                confirmButtonText: 'Aceptar'
+            });
+            $(this).val(''); // Limpiar solo el que está mal
+        }
+    });
+
+    $('#anio_1').on('change', function() {
+        const desde = $(this).val();
+        const hasta = $('#anio_2').val();
+        
+        if (desde && hasta && hasta < desde) {
+            Swal.fire({
+                title: 'Error de rango',
+                text: 'El año "Hasta" no puede ser menor que el año "Desde"',
+                icon: 'warning',
+                confirmButtonText: 'Aceptar'
+            });
+            $(this).val(''); // Limpiar la selección que causó el error
+        }
+    });
 //----------------------------------------------------------------------------------------------------------------------------
     let filtroActivo = null;
     let tipoGraficaSeleccionada = 'pie'; // Valor por defecto
@@ -454,6 +645,27 @@ $(document).ready(function() {
             method: 'GET',
             data: filtros,
             success: function(response) {
+                // VALIDACIÓN NUEVA: Verificar si hay datos para mostrar
+                if (response.total === 0 || Object.keys(response.data).length === 0) {
+                    Swal.fire({
+                        title: 'Sin datos',
+                        text: 'No se encontraron datos para generar la gráfica con los filtros seleccionados.',
+                        icon: 'warning',
+                        confirmButtonText: 'Aceptar'
+                    });
+                    
+                    // Ocultar gráfica si está visible
+                    $('#chartContainer').hide();
+                    $('#noChartMessage').show();
+                    return;
+                }
+
+                actualizarTablaConFiltros(filtros);
+
+                // Ocultar mensaje placeholder y mostrar gráfica
+                $('#noChartMessage').hide();
+                $('#chartContainer').show();
+
                 // Destruir gráfica anterior si existe
                 if(typeof window.myChart !== 'undefined') {
                     window.myChart.destroy();
@@ -497,10 +709,14 @@ $(document).ready(function() {
 
                 let chartOptions = {
                     responsive: true,
+                    maintainAspectRatio: true,
                     plugins: {
                         title: {
                             display: true,
-                            text: `Total de ${tipoFiltro.charAt(0).toUpperCase() + tipoFiltro.slice(1)}: ${response.total}`
+                            text: `Total de ${tipoFiltro.charAt(0).toUpperCase() + tipoFiltro.slice(1)}: ${response.total}`,
+                            font: {
+                                size: 16
+                            }
                         },
                         tooltip: {
                             callbacks: {
@@ -517,36 +733,36 @@ $(document).ready(function() {
                             color: '#fff',
                             font: {
                                 weight: 'bold',
-                                size: 16
+                                size: 12
                             },
                             formatter: function(value, context) {
                                 return percentages[context.dataIndex];
                             }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,    // Reducido de 12 a 10
+                                padding: 8,      // Reducido de 15 a 8
+                                font: {
+                                    size: 12     // Texto de leyenda más pequeño
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 20,
+                            bottom: 20,
+                            left: 20,
+                            right: 20
                         }
                     }
                 };
+
+                // Configuraciones específicas para cada tipo de gráfica
                 if (tipoGraficaSeleccionada === 'pie') {
-                    chartData = {
-                        labels: labels,
-                        datasets: [{
-                            data: dataValues,
-                            backgroundColor: generarColores(labels.length),
-                        }]
-                    };
-                    
-                    // Configuración específica para gráficos circulares
-                    chartOptions.plugins.datalabels = {
-                        display: true,
-                        color: '#fff',
-                        font: {
-                            weight: 'bold',
-                            size: 12
-                        },
-                        formatter: function(value, context) {
-                            return percentages[context.dataIndex];
-                        }
-                    };
-                }else if(tipoGraficaSeleccionada === 'doughnut'){
                     chartData = {
                         labels: labels,
                         datasets: [{
@@ -557,7 +773,42 @@ $(document).ready(function() {
                         }]
                     };
                     
-                    chartOptions.cutout = '50%'; // Esto define el tamaño del agujero (50% es el estándar)
+                    // Configuración específica para gráficos circulares
+                    chartOptions.plugins.datalabels = {
+                        display: true,
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        formatter: function(value, context) {
+                            return percentages[context.dataIndex];
+                        }
+                    };
+                    
+                    // Ajustes adicionales para pie chart
+                    chartOptions.layout.padding = {
+                        top: 10,
+                        bottom: 10,
+                        left: 10,
+                        right: 10
+                    };
+
+                    chartOptions.aspectRatio = 1.2; // Más ancha que alta
+                    chartOptions.maintainAspectRatio = true;
+
+                } else if(tipoGraficaSeleccionada === 'doughnut') {
+                    chartData = {
+                        labels: labels,
+                        datasets: [{
+                            data: dataValues,
+                            backgroundColor: generarColores(labels.length),
+                            borderWidth: 2,
+                            borderColor: '#fff',
+                        }]
+                    };
+                    
+                    chartOptions.cutout = '45%'; // Esto define el tamaño del agujero (50% es el estándar)
 
                     // Configuración específica para gráficos circulares
                     chartOptions.plugins.datalabels = {
@@ -565,25 +816,49 @@ $(document).ready(function() {
                         color: '#fff',
                         font: {
                             weight: 'bold',
-                            size: 12
+                            size: 14
                         },
                         formatter: function(value, context) {
                             return percentages[context.dataIndex];
                         }
                     };
-                } 
-                else if (tipoGraficaSeleccionada === 'bar') {
+                    
+                    // Ajustes adicionales para doughnut chart
+                    chartOptions.layout.padding = {
+                        top: 10,
+                        bottom: 10,
+                        left: 10,
+                        right: 10
+                    };
+
+                    chartOptions.aspectRatio = 1.2; // Más ancha que alta
+                    chartOptions.maintainAspectRatio = true;
+                    
+                } else if (tipoGraficaSeleccionada === 'bar') {
                     chartData = {
                         labels: labels,
                         datasets: [{
                             label: `Total de ${tipoFiltro}`,
                             data: dataValues,
                             backgroundColor: generarColores(labels.length),
+                            borderWidth: 1
                         }]
                     };
                     chartOptions.scales = {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
                         }
                     };
                     
@@ -594,12 +869,22 @@ $(document).ready(function() {
                         align: 'top',
                         color: '#333',
                         font: {
-                            weight: 'bold'
+                            weight: 'bold',
+                            size: 11
                         },
                         formatter: function(value, context) {
                             return percentages[context.dataIndex];
                         }
                     };
+                    
+                    // Ajustes para bar chart
+                    chartOptions.layout.padding = {
+                        top: 20,
+                        bottom: 20,
+                        left: 15,
+                        right: 15
+                    };
+                    
                 } else if (tipoGraficaSeleccionada === 'line') {
                     chartData = {
                         labels: labels,
@@ -607,12 +892,27 @@ $(document).ready(function() {
                             label: `Total de ${tipoFiltro}`,
                             data: dataValues,
                             borderColor: 'rgba(75, 192, 192, 1)',
-                            fill: false
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
                         }]
                     };
                     chartOptions.scales = {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
                         }
                     };
                     
@@ -622,13 +922,23 @@ $(document).ready(function() {
                         align: 'top',
                         color: '#333',
                         font: {
-                            weight: 'bold'
+                            weight: 'bold',
+                            size: 11
                         },
                         formatter: function(value, context) {
                             return percentages[context.dataIndex];
                         }
                     };
+                    
+                    // Ajustes para line chart
+                    chartOptions.layout.padding = {
+                        top: 20,
+                        bottom: 20,
+                        left: 15,
+                        right: 15
+                    };
                 }
+                
                 window.myChart = new Chart(ctx, {
                     type: tipoGraficaSeleccionada,
                     data: chartData,
@@ -648,11 +958,113 @@ $(document).ready(function() {
         }
         return colores;
     }
+
+    // Función para actualizar la tabla con los filtros aplicados
+function actualizarTablaConFiltros(filtros) {
+    $.ajax({
+        url: "{{ route('dashboard') }}",
+        method: 'GET',
+        data: filtros,
+        success: function(response) {
+            // Reemplazar el tbody de la tabla con los nuevos datos
+            const tbody = $('#resultadosFinalesTable tbody');
+            tbody.empty();
+            
+            if (response.alumnos.length > 0) {
+                response.alumnos.forEach(function(alumno) {
+                    const row = `
+                        <tr style="transition: all 0.2s ease; border-bottom: 1px solid #e9ecef;">
+                            <td class="fw-medium text-center" style="padding: 10px 8px; font-size: 0.8rem; background-color: #f8f9fa; border-right: 1px solid #e9ecef;">
+                                ${alumno.Id_Registro}
+                            </td>
+                            <td class="text-center" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                ${alumno.Anio}
+                            </td>
+                            <td class="fw-medium text-center" style="padding: 10px 8px; font-size: 0.8rem; background-color: #f8f9fa; border-right: 1px solid #e9ecef;">
+                                ${alumno.Id_Reg_A}
+                            </td>
+                            <td class="text-primary fw-bold text-center" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                ${alumno.Cv_Alumno}
+                            </td>
+                            <td class="fw-semibold" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                ${alumno.Nombre_Alumno}
+                            </td>
+                            <td class="text-center" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                ${alumno.Gen}
+                            </td>
+                            <td class="fw-medium" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                ${alumno.Carrera}
+                            </td>
+                            <td class="text-truncate" style="padding: 10px 8px; font-size: 0.8rem; max-width: 150px; border-right: 1px solid #e9ecef;" title="${alumno.email}">
+                                ${alumno.email}
+                            </td>
+                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                ${alumno.Mat_1}
+                            </td>
+                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                ${alumno.Mat_2}
+                            </td>
+                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                ${alumno.Mat_3}
+                            </td>
+                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                ${alumno.Escuela}
+                            </td>
+                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                ${alumno.TBaja}
+                            </td>
+                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                ${alumno.Inc_Carr}
+                            </td>
+                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                ${alumno.Empresa}
+                            </td>
+                            <td style="padding: 10px 8px; font-size: 0.8rem;">
+                                ${alumno.Titulacion}
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+                
+                // Mostrar mensaje de resultados
+                $('#mensaje').text(`Mostrando ${response.alumnos.length} registros filtrados`);
+            } else {
+                tbody.append(`
+                    <tr>
+                        <td colspan="16" class="text-center text-muted py-4">
+                            No se encontraron registros con los filtros aplicados
+                        </td>
+                    </tr>
+                `);
+                $('#mensaje').text('No se encontraron registros con los filtros aplicados');
+            }
+        },
+        error: function() {
+            Swal.fire({
+                title: 'Error',
+                text: 'Error al cargar los datos filtrados',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+        }
+    });
+}
 //----------------------------------------------------------------------------------------------------------------------------
     $('#btnDownloadPDF').on('click', function () {
     // Obtener el canvas y la imagen base64
     let canvas = document.getElementById('dataChart');
     let base64Image = canvas.toDataURL('image/png');
+
+    if (!window.datosGrafica || Object.keys(window.datosGrafica).length === 0 || window.totalGrafica === 0) {
+        Swal.fire({
+            title: 'Error',
+            text: 'No hay datos en el gráfico para generar el PDF. Primero genera una gráfica válida.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
+        return;
+    }
 
     // Verificar si hay datos en el gráfico (asumiendo que usas Chart.js)
     const chartInstance = Chart.getChart(canvas);
@@ -731,7 +1143,17 @@ $(document).ready(function() {
     });
 });
 
+//____________________boton de limpiar-------------------
 
+$('#limpiarFiltrosBtn').on('click', function() {
+    // Limpiar todos los filtros
+    $('.filtro-unico').prop('checked', false).prop('disabled', false);
+    $('#baja, #Carrera, #escuela, #materia, #trabajo, #tipo_titulacion').val('todas');
+    $('#anio_1, #anio_2').val('');
+    
+    // Recargar la tabla con todos los datos
+    location.reload();
+});
     
 //------------------------------------------------------------------------------------------------------------------------------
 

@@ -78,4 +78,6 @@ Route::get('/get-data', [GraficoController::class, 'getData'])->name('get.data')
 Route::get('/api/materias', [BotonesController::class, 'materias']);
 Route::get('/api/trabajos', [BotonesController::class, 'trabajos']);
 Route::get('/api/escuelas', [BotonesController::class, 'escuelas']);
+Route::get('/api/generaciones', [BotonesController::class, 'generation']);
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 require __DIR__.'/auth.php';
