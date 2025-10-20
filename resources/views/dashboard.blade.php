@@ -21,12 +21,7 @@
                 <img src="{{ asset('images/addData_icon.svg') }}" alt="Upload file" data-bs-toggle="modal" data-bs-target="#uploadFile" style="display: block; margin: 0 auto;">
                 Subir datos
             </a>
-            <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
             @endif
-            <button id="btnDownloadPDF" style="background:none; border:none; cursor:pointer; color:black; text-align:center;">
-                <img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics" style="display: block; margin: 0 auto;">
-                Generar Reporte
-            </button>
         </nav>
         <!-- Contenido principal -->
         <main class="col-md-10 offset-md-1 col-12" style="margin-top: 80px;">
@@ -180,6 +175,9 @@
                                     </button>
                                     <button class="btn btn-outline-secondary btn-sm w-100 fw-semibold mt-1" id="limpiarFiltrosBtn">
                                         <i class="fas fa-times me-1"></i>Limpiar Filtros
+                                    </button>
+                                    <button class="btn btn-primary btn-sm w-100 fw-semibold mt-1" id="btnDownloadPDF">
+                                        Generar Reporte
                                     </button>
                                     <p id="mensaje" class="small text-muted mt-1 mb-0"></p>
                                 </div>

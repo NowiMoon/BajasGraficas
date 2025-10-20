@@ -95,4 +95,11 @@ class MateriaController extends Controller
         }
         
     }
+
+    public function index()
+    {
+        $materias = Materia::all();
+        return view('gestion_materias', compact('materias'));
+    }
+    
 }
