@@ -21,12 +21,7 @@
                 <img src="{{ asset('images/addData_icon.svg') }}" alt="Upload file" data-bs-toggle="modal" data-bs-target="#uploadFile" style="display: block; margin: 0 auto;">
                 Subir datos
             </a>
-            <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
             @endif
-            <button id="btnDownloadPDF" style="background:none; border:none; cursor:pointer; color:black; text-align:center;">
-                <img src="{{ asset('images/download_icon.svg') }}" alt="Download analytics" style="display: block; margin: 0 auto;">
-                Generar Reporte
-            </button>
         </nav>
         <!-- Contenido principal -->
         <main class="col-md-10 offset-md-1 col-12" style="margin-top: 80px;">
@@ -60,10 +55,10 @@
                     <div class="row g-3">
                         <!-- Columna izquierda - Controles (1/4) -->
                         <div class="col-md-3">
-                            <div class="d-flex flex-column gap-2">
-                                <!-- Sección Tipo de Gráfica -->
-                                <div class="mb-2">
-                                    <label class="form-label mb-1 fw-semibold small">Tipo de gráfica:</label>
+                            <div class="d-flex flex-column gap-3">
+                                <!-- CUADRO 1: Tipo de Gráfica -->
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="fw-semibold mb-2">Tipo de Gráfica</h6>
                                     <select class="form-select form-select-sm" id="tipoGrafica">
                                         <option value="pie">Gráfica de Pie</option>
                                         <option value="doughnut">Gráfica de Dona</option>
@@ -72,122 +67,172 @@
                                     </select>
                                 </div>
 
-                                <!-- Sección Tipo de Baja con checkbox -->
-                                <div class="mb-2">
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input filtro-unico" type="checkbox" id="bajaCheckbox">
-                                        <label class="form-check-label fw-semibold small" for="bajaCheckbox">Tipo de baja:</label>
-                                    </div>
-                                    <select class="form-select form-select-sm mt-1" id="baja">
-                                        <option value="todas">Todas</option>
-                                        <option value="Trámite de Pasantía">Trámite de Pasantía</option>
-                                        <option value="Baja Temporal o Definitiva">Baja Temporal o Definitiva</option>
-                                        <option value="Cambio de Carrera">Cambio de Carrera</option>
-                                    </select>
-                                </div>
-
-                                <!-- Sección Generación -->
-                                <div class="mb-2">
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input filtro-unico" type="checkbox" id="generacion">
-                                        <label class="form-check-label fw-semibold small" for="generacion">Generación:</label>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-1 mt-1">
-                                        <select class="form-select form-select-sm" id="anio_1" style="width: 80px;">
-                                            <option value="" disabled selected>Desde</option>
-                                        </select>
-                                        <span class="small fw-semibold">a</span>
-                                        <select class="form-select form-select-sm" id="anio_2" style="width: 80px;">
-                                            <option value="" disabled selected>Hasta</option>
-                                        </select>
+                                <!-- CUADRO 2: Generación -->
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="fw-semibold mb-2">Selecciona la generación a filtrar</h6>
+                                    <div class="mb-2">
+                                        <div class="d-flex align-items-center gap-1 mt-1">
+                                            <select class="form-select form-select-sm" id="anio_1" style="width: 90px;">
+                                                <option value="" disabled selected>Desde</option>
+                                            </select>
+                                            <span class="small fw-semibold">a</span>
+                                            <select class="form-select form-select-sm" id="anio_2" style="width: 90px;">
+                                                <option value="" disabled selected>Hasta</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Sección Carrera con checkbox -->
-                                <div class="mb-2">
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input filtro-unico" type="checkbox" id="carreraCheckbox">
-                                        <label class="form-check-label fw-semibold small" for="carreraCheckbox">Carrera:</label>
+                                <!-- CUADRO 3: Tema de la grafica  -->
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="fw-semibold mb-3">Tema de la gráfica</h6>
+                                    <div class="d-flex flex-column gap-2">
+                                        <!-- Radio buttons con mejor visibilidad -->
+                                        <div class="mb-2">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input filtro-unico" type="radio" name="temaGrafica" id="generacion" value="generacion" style="transform: scale(1.2); border: 2px solid #004A98;">
+                                                <label class="form-check-label fw-semibold small ms-2" for="generacion" style="color: #2c3e50;">Generación</label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input filtro-unico" type="radio" name="temaGrafica" id="bajaCheckbox" value="baja" style="transform: scale(1.2); border: 2px solid #004A98;">
+                                                <label class="form-check-label fw-semibold small ms-2" for="bajaCheckbox" style="color: #2c3e50;">Tipo de baja</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input filtro-unico" type="radio" name="temaGrafica" id="carreraCheckbox" value="carrera" style="transform: scale(1.2); border: 2px solid #004A98;">
+                                                <label class="form-check-label fw-semibold small ms-2" for="carreraCheckbox" style="color: #2c3e50;">Carrera</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input filtro-unico" type="radio" name="temaGrafica" id="escuelaCheckbox" value="escuela" style="transform: scale(1.2); border: 2px solid #004A98;">
+                                                <label class="form-check-label fw-semibold small ms-2" for="escuelaCheckbox" style="color: #2c3e50;">Escuela</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input filtro-unico" type="radio" name="temaGrafica" id="materiaCheckbox" value="materia" style="transform: scale(1.2); border: 2px solid #004A98;">
+                                                <label class="form-check-label fw-semibold small ms-2" for="materiaCheckbox" style="color: #2c3e50;">Materia difícil</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input filtro-unico" type="radio" name="temaGrafica" id="titulacionCheckbox" value="titulacion" style="transform: scale(1.2); border: 2px solid #004A98;">
+                                                <label class="form-check-label fw-semibold small ms-2" for="titulacionCheckbox" style="color: #2c3e50;">Tipo de titulación</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input filtro-unico" type="radio" name="temaGrafica" id="trabajoCheckbox" value="trabajo" style="transform: scale(1.2); border: 2px solid #004A98;">
+                                                <label class="form-check-label fw-semibold small ms-2" for="trabajoCheckbox" style="color: #2c3e50;">Lugar donde labura:</label>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <select class="form-select form-select-sm mt-1" id="Carrera">
-                                        <option value="todas">Todas</option>
-                                        <option value="Ingeniero en Computación">Ingeniero en Computación</option>
-                                        <option value="Ingeniero en Sistemas Inteligentes">Ingeniero en Sistemas Inteligentes</option>
-                                        <option value="Ingeniero en Informática">Ingeniero en Informática</option>
-                                    </select>
                                 </div>
 
-                                <!-- Sección Escuela con checkbox -->
-                                <div class="mb-2">
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input filtro-unico" type="checkbox" id="escuelaCheckbox">
-                                        <label class="form-check-label fw-semibold small" for="escuelaCheckbox">Escuela:</label>
-                                    </div>
-                                    <select class="form-select form-select-sm mt-1" id="escuela">
-                                        <option value="todas">Todas</option>
-                                    </select>
-                                </div>
+                                <!-- CUADRO: Filtros adicoonales -->
+                                <div class="border rounded p-3 bg-light">
+                                    <h6 class="fw-semibold mb-2">Filtros adicionales</h6>
+                                    <div class="d-flex flex-column gap-2">
+                                        <!-- Solo los selectbox sin checkboxes -->
+                                        <div class="mb-2">
+                                            <label for="baja" class="form-label small fw-semibold mb-1">Tipos de baja existentes</label>
+                                            <select class="form-select form-select-sm" id="baja">
+                                                <option value="todas">Todas</option>
+                                                <option value="Trámite de Pasantía">Trámite de Pasantía</option>
+                                                <option value="Baja Temporal o Definitiva">Baja Temporal o Definitiva</option>
+                                                <option value="Cambio de Carrera">Cambio de Carrera</option>
+                                            </select>
+                                        </div>
 
-                                <!-- Sección Materias Dificiles con checkbox -->
-                                <div class="mb-2">
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input filtro-unico" type="checkbox" id="materiaCheckbox">
-                                        <label class="form-check-label fw-semibold small" for="materiaCheckbox">Materia difícil:</label>
-                                    </div>
-                                    <select class="form-select form-select-sm mt-1" id="materia">
-                                        <option value="todas">Todas</option>
-                                    </select>
-                                </div>
+                                        <div class="mb-2">
+                                            <label for="Carrera" class="form-label small fw-semibold mb-1">Carreras del área</label>
+                                            <select class="form-select form-select-sm" id="Carrera">
+                                                <option value="todas">Todas</option>
+                                                <option value="Ingeniero en Computación">Ingeniería en Computación</option>
+                                                <option value="Ingeniero en Sistemas Inteligentes">Ingeniería en Sistemas Inteligentes</option>
+                                                <option value="Ingeniero en Informática">Ingeniería en Informática</option>
+                                            </select>
+                                        </div>
 
-                                <!-- Sección Tipo de titulación con checkbox -->
-                                <div class="mb-2">
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input filtro-unico" type="checkbox" id="titulacionCheckbox">
-                                        <label class="form-check-label fw-semibold small" for="titulacionCheckbox">Tipo de titulación:</label>
-                                    </div>
-                                    <select class="form-select form-select-sm mt-1" id="tipo_titulacion">
-                                        <option value="todas">Todas</option>
-                                        <option value="Trabajo recepcional">Trabajo recepcional</option>
-                                        <option value="Trabajo por excelencia">Trabajo por excelencia</option>
-                                        <option value="Trabajo colectivo">Trabajo colectivo</option>
-                                        <option value="Memorias de actividad profesional">Memorias de actividad profesional</option>
-                                        <option value="Examen General de Conocimientos">Examen General de Conocimientos</option>
-                                        <option value="Curso de opción a No trabajo recepcional (Diplomado)">Curso de opción a No trabajo recepcional (Diplomado)</option>
-                                        <option value="Un semestre de maestría">Un semestre de maestría</option>
-                                        <option value="Dos semestres de maestría">Dos semestres de maestría</option>
-                                        <option value="Exención de Examen Promedio mayor a 9">Exención de Examen Promedio mayor a 9</option>
-                                        <option value="Examen General de Egreso de la Licenciatura (EGEL)">Examen General de Egreso de la Licenciatura (EGEL)</option>
-                                        <option value="Por artículo científico">Por artículo científico</option>
-                                        <option value="Ninguna">Ninguna</option>
-                                    </select>
-                                </div>
+                                        <div class="mb-2">
+                                            <label for="escuela" class="form-label small fw-semibold mb-1">Escuelas</label>
+                                            <select class="form-select form-select-sm" id="escuela">
+                                                <option value="todas">Todas</option>
+                                            </select>
+                                        </div>
 
-                                <!-- Sección Trabajo con checkbox -->
-                                <div class="mb-2">
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input filtro-unico" type="checkbox" id="trabajoCheckbox">
-                                        <label class="form-check-label fw-semibold small" for="trabajoCheckbox">Lugar donde labura:</label>
-                                    </div>
-                                    <select class="form-select form-select-sm mt-1" id="trabajo">
-                                        <option value="todas">Todas</option>
-                                    </select>
-                                </div>
+                                        <div class="mb-2">
+                                            <label for="materia" class="form-label small fw-semibold mb-1">Materias difíciles</label>
+                                            <select class="form-select form-select-sm" id="materia">
+                                                <option value="todas">Todas</option>
+                                            </select>
+                                        </div>
 
-                                <!-- Botón y mensaje -->
-                                <div class="mt-2">
-                                    <button class="btn btn-success btn-sm w-100 fw-semibold" id="generarGraficaBtn">
-                                        <i class="fas fa-chart-bar me-1"></i>Generar Gráfica
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm w-100 fw-semibold mt-1" id="limpiarFiltrosBtn">
-                                        <i class="fas fa-times me-1"></i>Limpiar Filtros
-                                    </button>
-                                    <p id="mensaje" class="small text-muted mt-1 mb-0"></p>
+                                        <div class="mb-2">
+                                            <label for="tipo_titulacion" class="form-label small fw-semibold mb-1">Tipos de titulación</label>
+                                            <select class="form-select form-select-sm" id="tipo_titulacion">
+                                                <option value="todas">Todas</option>
+                                                <option value="Trabajo recepcional">Trabajo recepcional</option>
+                                                <option value="Trabajo por excelencia">Trabajo por excelencia</option>
+                                                <option value="Trabajo colectivo">Trabajo colectivo</option>
+                                                <option value="Memorias de actividad profesional">Memorias de actividad profesional</option>
+                                                <option value="Examen General de Conocimientos">Examen General de Conocimientos</option>
+                                                <option value="Curso de opción a No trabajo recepcional (Diplomado)">Curso de opción a No trabajo recepcional (Diplomado)</option>
+                                                <option value="Un semestre de maestría">Un semestre de maestría</option>
+                                                <option value="Dos semestres de maestría">Dos semestres de maestría</option>
+                                                <option value="Exención de Examen Promedio mayor a 9">Exención de Examen Promedio mayor a 9</option>
+                                                <option value="Examen General de Egreso de la Licenciatura (EGEL)">Examen General de Egreso de la Licenciatura (EGEL)</option>
+                                                <option value="Por artículo científico">Por artículo científico</option>
+                                                <option value="Ninguna">Ninguna</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <label for="trabajo" class="form-label small fw-semibold mb-1">Trabajos</label>
+                                            <select class="form-select form-select-sm" id="trabajo">
+                                                <option value="todas">Todas</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
+                                <!-- Mensaje fuera de los cuadros -->
+                                <p id="mensaje" class="small text-muted mt-1 mb-0"></p>
                             </div>
                         </div>
 
                         <!-- Columna derecha - Gráfica (3/4) - MÁS GRANDE Y CENTRADA -->
                         <div class="col-md-9">
+                            <!-- RECUADRO DE BOTONES HORIZONTAL -->
+                            <div class="border rounded p-3 bg-light mb-3">
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <button class="btn btn-outline-primary btn-sm w-100 fw-semibold" id="generarGraficaBtn" style="border: 2px solid #004A98; color: #004A98;">
+                                            <i class="fas fa-chart-bar me-1"></i>Generar Gráfica
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-outline-primary btn-sm w-100 fw-semibold" id="limpiarFiltrosBtn" style="border: 2px solid #004A98; color: #004A98;">
+                                            <i class="fas fa-times me-1"></i>Limpiar Filtros
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-outline-primary btn-sm w-100 fw-semibold" id="btnDownloadPDF" style="border: 2px solid #004A98; color: #004A98;">
+                                            <i class="fas fa-file-pdf me-1"></i>Generar Reporte
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CONTENEDOR DE GRÁFICA -->
                             <div id="chartContainer" style="display: none; width: 100%; height: 70vh; position: relative;">
                                 <div class="d-flex justify-content-center align-items-center h-100">
                                     <canvas id="dataChart" style="max-width: 100%; max-height: 100%;"></canvas>
@@ -574,38 +619,26 @@ $(document).ready(function() {
     });
 //----------------------------------------------------------------------------------------------------------------------------
     let filtroActivo = null;
-    let tipoGraficaSeleccionada = 'pie'; // Valor por defecto
+let tipoGraficaSeleccionada = 'pie'; // Valor por defecto
 
-    window.datosGrafica = null;
-    window.totalGrafica = null;
-    Nombre_de_la_grafica = null;
+window.datosGrafica = null;
+window.totalGrafica = null;
+Nombre_de_la_grafica = null;
 
-    // Manejar cambio en checkboxes
-    $('.filtro-unico').change(function() {
-        if ($(this).is(':checked')) {
-            // Deshabilitar otros checkboxes
-            $('.filtro-unico').not(this).prop('disabled', true);
-            filtroActivo = $(this).attr('id');
-        } else {
-            // Habilitar todos si se desmarca
-            $('.filtro-unico').prop('disabled', false);
-            filtroActivo = null;
-        }
-    });    
+// Manejar cambio en radio buttons (ya no necesitamos deshabilitar otros porque son radios)
+$('.filtro-unico').change(function() {
+    if ($(this).is(':checked')) {
+        filtroActivo = $(this).attr('id');
+    }
+});
 
-    $('#tipoGrafica').change(function() {
-        tipoGraficaSeleccionada = $(this).val();
-    });
+$('#tipoGrafica').change(function() {
+    tipoGraficaSeleccionada = $(this).val();
+});
 
-    $('#generarGraficaBtn').on('click', function() {
-    // Verificar si hay algún checkbox de filtro seleccionado
-    let filtroSeleccionado = false;
-    $('.filtro-unico').each(function() {
-        if ($(this).is(':checked')) {
-            filtroSeleccionado = true;
-            return false; // Salir del each si encuentra uno seleccionado
-        }
-    });
+$('#generarGraficaBtn').on('click', function() {
+    // Verificar si hay algún radio button seleccionado
+    let filtroSeleccionado = $('input[name="temaGrafica"]:checked').length > 0;
 
     if (!filtroSeleccionado) {
         Swal.fire({
@@ -617,13 +650,8 @@ $(document).ready(function() {
         return; // Detener la ejecución
     }
 
-    // Obtener el tipo de filtro activo (checkbox seleccionado)
-    let tipoFiltro = null;
-    $('.filtro-unico').each(function() {
-        if ($(this).is(':checked')) {
-            tipoFiltro = $(this).attr('id').replace('Checkbox', '').toLowerCase();
-        }
-    });
+    // Obtener el tipo de filtro activo (radio button seleccionado)
+    let tipoFiltro = $('input[name="temaGrafica"]:checked').val();
 
         // Construir objeto de filtros dinámicamente
         const filtros = {

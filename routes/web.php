@@ -48,11 +48,8 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 // Rutas del Coordinador
 Route::group(['middleware' => ['auth', 'coordinador']], function () {
     //Ruta vista Gestion de materias
-    Route::get('gestion_materias', function () {
-        return view('gestion_materias');
-    })->name('gestion_materias');
 
-
+    Route::get('gestion_materias', [MateriaController::class, 'index'])->name('gestion_materias');
     Route::post('gestion_materias', [MateriaController::class,'store'])->name('gestion_materias.store');
     Route::post('/upload_subjects', [ExcelController::class, 'uploadSubjects'])->name('upload_subjects');
     Route::post('/upload', [ExcelController::class, 'upload'])->name('upload');
