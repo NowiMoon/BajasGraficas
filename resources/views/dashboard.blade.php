@@ -132,7 +132,7 @@
                                         <div class="mb-2">
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input filtro-unico" type="radio" name="temaGrafica" id="trabajoCheckbox" value="trabajo" style="transform: scale(1.2); border: 2px solid #004A98;">
-                                                <label class="form-check-label fw-semibold small ms-2" for="trabajoCheckbox" style="color: #2c3e50;">Lugar donde labura:</label>
+                                                <label class="form-check-label fw-semibold small ms-2" for="trabajoCheckbox" style="color: #2c3e50;">Lugar donde labura</label>
                                             </div>
                                         </div>
                                     </div>
@@ -518,6 +518,8 @@
 window.datosGrafica = null;
 window.totalGrafica = null;
 Nombre_de_la_grafica = null;
+window.titulo = null;
+window.subtitulo = null;
 
 $(document).ready(function() {
 //----------------------------------------------------------------------------------------------------------------------------
@@ -624,6 +626,8 @@ let tipoGraficaSeleccionada = 'pie'; // Valor por defecto
 window.datosGrafica = null;
 window.totalGrafica = null;
 Nombre_de_la_grafica = null;
+window.titulo = null;
+window.subtitulo = null;
 
 // Manejar cambio en radio buttons (ya no necesitamos deshabilitar otros porque son radios)
 $('.filtro-unico').change(function() {
@@ -635,7 +639,6 @@ $('.filtro-unico').change(function() {
 $('#tipoGrafica').change(function() {
     tipoGraficaSeleccionada = $(this).val();
 });
-
 $('#generarGraficaBtn').on('click', function() {
     // Verificar si hay algún radio button seleccionado
     let filtroSeleccionado = $('input[name="temaGrafica"]:checked').length > 0;
@@ -653,329 +656,403 @@ $('#generarGraficaBtn').on('click', function() {
     // Obtener el tipo de filtro activo (radio button seleccionado)
     let tipoFiltro = $('input[name="temaGrafica"]:checked').val();
 
-        // Construir objeto de filtros dinámicamente
-        const filtros = {
-            tipo_grafica: tipoGraficaSeleccionada,
-            tipo_filtro: tipoFiltro // Agregamos el tipo de filtro seleccionado
-        };
+    // Construir objeto de filtros dinámicamente
+    const filtros = {
+        tipo_grafica: tipoGraficaSeleccionada,
+        tipo_filtro: tipoFiltro // Agregamos el tipo de filtro seleccionado
+    };
 
-        filtros.baja = $('#baja').val();
-        filtros.generacion_desde = $('#anio_1').val();
-        filtros.generacion_hasta = $('#anio_2').val();
-        filtros.carrera = $('#Carrera').val();
-        filtros.escuela = $('#escuela').val();
-        filtros.materia = $('#materia').val();
-        filtros.trabajo = $('#trabajo').val();
-        filtros.tipo_titulacion = $('#tipo_titulacion').val();
+    filtros.baja = $('#baja').val();
+    filtros.generacion_desde = $('#anio_1').val();
+    filtros.generacion_hasta = $('#anio_2').val();
+    filtros.carrera = $('#Carrera').val();
+    filtros.escuela = $('#escuela').val();
+    filtros.materia = $('#materia').val();
+    filtros.trabajo = $('#trabajo').val();
+    filtros.tipo_titulacion = $('#tipo_titulacion').val();
 
-        $.ajax({
-             url: "{{ route('get.data') }}",
-            method: 'GET',
-            data: filtros,
-            success: function(response) {
-                // VALIDACIÓN NUEVA: Verificar si hay datos para mostrar
-                if (response.total === 0 || Object.keys(response.data).length === 0) {
-                    Swal.fire({
-                        title: 'Sin datos',
-                        text: 'No se encontraron datos para generar la gráfica con los filtros seleccionados.',
-                        icon: 'warning',
-                        confirmButtonText: 'Aceptar'
-                    });
-                    
-                    // Ocultar gráfica si está visible
-                    $('#chartContainer').hide();
-                    $('#noChartMessage').show();
-                    return;
-                }
+    // CONSTRUIR DESCRIPCIÓN DETALLADA DE LA GRÁFICA
+    let descripcionFiltros = [];
+    
+    // Filtro de generación
+    if (filtros.generacion_desde && filtros.generacion_hasta) {
+        if (filtros.generacion_desde === filtros.generacion_hasta) {
+            descripcionFiltros.push(`Generación ${filtros.generacion_desde}`);
+        } else {
+            descripcionFiltros.push(`Generaciones ${filtros.generacion_desde} - ${filtros.generacion_hasta}`);
+        }
+    } else if (filtros.generacion_desde) {
+        descripcionFiltros.push(`Desde generación ${filtros.generacion_desde}`);
+    } else if (filtros.generacion_hasta) {
+        descripcionFiltros.push(`Hasta generación ${filtros.generacion_hasta}`);
+    }
 
-                actualizarTablaConFiltros(filtros);
+    // Filtro de carrera
+    if (filtros.carrera && filtros.carrera !== 'todas') {
+        descripcionFiltros.push(`Carrera: ${filtros.carrera}`);
+    }
 
-                // Ocultar mensaje placeholder y mostrar gráfica
-                $('#noChartMessage').hide();
-                $('#chartContainer').show();
+    // Filtro de tipo de baja
+    if (filtros.baja && filtros.baja !== 'todas') {
+        descripcionFiltros.push(`Baja: ${filtros.baja}`);
+    }
 
-                // Destruir gráfica anterior si existe
-                if(typeof window.myChart !== 'undefined') {
-                    window.myChart.destroy();
-                }
+    // Filtro de escuela
+    if (filtros.escuela && filtros.escuela !== 'todas') {
+        descripcionFiltros.push(`Escuela: ${filtros.escuela}`);
+    }
 
-                window.datosGrafica = response.data;
-                window.totalGrafica = response.total;
+    // Filtro de materia
+    if (filtros.materia && filtros.materia !== 'todas') {
+        descripcionFiltros.push(`Materia: ${filtros.materia}`);
+    }
+
+    // Filtro de tipo de titulación
+    if (filtros.tipo_titulacion && filtros.tipo_titulacion !== 'todas') {
+        descripcionFiltros.push(`Titulación: ${filtros.tipo_titulacion}`);
+    }
+
+    // Filtro de trabajo
+    if (filtros.trabajo && filtros.trabajo !== 'todas') {
+        descripcionFiltros.push(`Trabajo: ${filtros.trabajo}`);
+    }
+
+    // Si no hay filtros específicos, agregar "Todos los registros"
+    if (descripcionFiltros.length === 0) {
+        descripcionFiltros.push('Todos los registros');
+    }
+
+    // Construir el nombre completo de la gráfica
+    const nombreBase = `Gráfica de ${tipoFiltro.charAt(0).toUpperCase() + tipoFiltro.slice(1)}`;
+    const descripcionCompleta = `${descripcionFiltros.join(', ')}`;
+    
+    // Asignar a la variable global
+    Nombre_de_la_grafica = nombreBase;
+    window.titulo = nombreBase;
+    window.subtitulo = descripcionCompleta;
+
+    $.ajax({
+        url: "{{ route('get.data') }}",
+        method: 'GET',
+        data: filtros,
+        success: function(response) {
+            // VALIDACIÓN NUEVA: Verificar si hay datos para mostrar
+            if (response.total === 0 || Object.keys(response.data).length === 0) {
+                Swal.fire({
+                    title: 'Sin datos',
+                    text: 'No se encontraron datos para generar la gráfica con los filtros seleccionados.',
+                    icon: 'warning',
+                    confirmButtonText: 'Aceptar'
+                });
                 
-                const datosFiltrados = Object.entries(response.data).reduce((acc, [key, value]) => {
-                    if (value >= 3) {
-                        acc[key] = value;
-                    }
-                    return acc;
-                }, {});
+                // Ocultar gráfica si está visible
+                $('#chartContainer').hide();
+                $('#noChartMessage').show();
+                return;
+            }
 
-                // Calcular la suma de los valores menores a 3
-                const sumaOtros = Object.entries(response.data)
-                    .filter(([key, value]) => value < 3)
-                    .reduce((sum, [key, value]) => sum + value, 0);
+            actualizarTablaConFiltros(filtros);
 
-                // Agregar "Otros" solo si hay valores menores a 3
-                if (sumaOtros > 0) {
-                    datosFiltrados['Otros'] = sumaOtros;
+            // Ocultar mensaje placeholder y mostrar gráfica
+            $('#noChartMessage').hide();
+            $('#chartContainer').show();
+
+            // Destruir gráfica anterior si existe
+            if(typeof window.myChart !== 'undefined') {
+                window.myChart.destroy();
+            }
+
+            window.datosGrafica = response.data;
+            window.totalGrafica = response.total;
+            
+            const datosFiltrados = Object.entries(response.data).reduce((acc, [key, value]) => {
+                if (value >= 3) {
+                    acc[key] = value;
                 }
-                
-                window.datosGraficaFiltrados = datosFiltrados;
+                return acc;
+            }, {});
 
-                // Mostrar contenedor de gráfica
-                $('#chartContainer').show();
+            // Calcular la suma de los valores menores a 3
+            const sumaOtros = Object.entries(response.data)
+                .filter(([key, value]) => value < 3)
+                .reduce((sum, [key, value]) => sum + value, 0);
 
-                Nombre_de_la_grafica = `Gráfica de ${tipoFiltro.charAt(0).toUpperCase() + tipoFiltro.slice(1)}`;
+            // Agregar "Otros" solo si hay valores menores a 3
+            if (sumaOtros > 0) {
+                datosFiltrados['Otros'] = sumaOtros;
+            }
+            
+            window.datosGraficaFiltrados = datosFiltrados;
 
-                const ctx = document.getElementById('dataChart').getContext('2d');
-                let chartData;
-                const labels = Object.keys(window.datosGraficaFiltrados);
-                const dataValues = Object.values(window.datosGraficaFiltrados);
-                const total = response.total;
+            // Mostrar contenedor de gráfica
+            $('#chartContainer').show();
 
-                // Calcular porcentajes
-                const percentages = dataValues.map(value => ((value / total) * 100).toFixed(1) + '%');
+            const ctx = document.getElementById('dataChart').getContext('2d');
+            let chartData;
+            const labels = Object.keys(window.datosGraficaFiltrados);
+            const dataValues = Object.values(window.datosGraficaFiltrados);
+            const total = response.total;
 
-                let chartOptions = {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: `Total de ${tipoFiltro.charAt(0).toUpperCase() + tipoFiltro.slice(1)}: ${response.total}`,
-                            font: {
-                                size: 16
-                            }
+            // Calcular porcentajes
+            const percentages = dataValues.map(value => ((value / total) * 100).toFixed(1) + '%');
+
+            let chartOptions = {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: window.titulo, // TÍTULO PRINCIPAL
+                        font: {
+                            size: 18,
+                            weight: 'bold'
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.raw;
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return `${context.label}: ${value} registros (${percentage}%)`;
-                                }
-                            }
+                        padding: {
+                            top: 10,
+                            bottom: 5
+                        }
+                    },
+                    subtitle: {
+                        display: true,
+                        text: window.subtitulo, // SUBTÍTULO CON FILTROS
+                        font: {
+                            size: 14,
+                            style: 'italic'
                         },
-                        // Plugin para mostrar etiquetas en el gráfico
-                        datalabels: {
-                            display: true,
-                            color: '#fff',
-                            font: {
-                                weight: 'bold',
-                                size: 12
-                            },
-                            formatter: function(value, context) {
-                                return percentages[context.dataIndex];
-                            }
-                        },
-                        legend: {
-                            display: true,
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 10,    // Reducido de 12 a 10
-                                padding: 8,      // Reducido de 15 a 8
-                                font: {
-                                    size: 12     // Texto de leyenda más pequeño
-                                }
+                        padding: {
+                            bottom: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${context.label}: ${value} registros (${percentage}%)`;
                             }
                         }
                     },
-                    layout: {
-                        padding: {
-                            top: 20,
-                            bottom: 20,
-                            left: 20,
-                            right: 20
+                    // Plugin para mostrar etiquetas en el gráfico
+                    datalabels: {
+                        display: true,
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 12
+                        },
+                        formatter: function(value, context) {
+                            return percentages[context.dataIndex];
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 10,
+                            padding: 8,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 25,  // Más padding para acomodar ambos títulos
+                        bottom: 20,
+                        left: 20,
+                        right: 20
+                    }
+                }
+            };
+
+            // Configuraciones específicas para cada tipo de gráfica
+            if (tipoGraficaSeleccionada === 'pie') {
+                chartData = {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: generarColores(labels.length),
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                    }]
+                };
+                
+                // Configuración específica para gráficos circulares
+                chartOptions.plugins.datalabels = {
+                    display: true,
+                    color: '#fff',
+                    font: {
+                        weight: 'bold',
+                        size: 14
+                    },
+                    formatter: function(value, context) {
+                        return percentages[context.dataIndex];
+                    }
+                };
+                
+                // Ajustes adicionales para pie chart
+                chartOptions.layout.padding = {
+                    top: 10,
+                    bottom: 10,
+                    left: 10,
+                    right: 10
+                };
+
+                chartOptions.aspectRatio = 1.2;
+                chartOptions.maintainAspectRatio = true;
+
+            } else if(tipoGraficaSeleccionada === 'doughnut') {
+                chartData = {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: generarColores(labels.length),
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                    }]
+                };
+                
+                chartOptions.cutout = '45%';
+
+                // Configuración específica para gráficos circulares
+                chartOptions.plugins.datalabels = {
+                    display: true,
+                    color: '#fff',
+                    font: {
+                        weight: 'bold',
+                        size: 14
+                    },
+                    formatter: function(value, context) {
+                        return percentages[context.dataIndex];
+                    }
+                };
+                
+                // Ajustes adicionales para doughnut chart
+                chartOptions.layout.padding = {
+                    top: 10,
+                    bottom: 10,
+                    left: 10,
+                    right: 10
+                };
+
+                chartOptions.aspectRatio = 1.2;
+                chartOptions.maintainAspectRatio = true;
+                
+            } else if (tipoGraficaSeleccionada === 'bar') {
+                chartData = {
+                    labels: labels,
+                    datasets: [{
+                        label: `Total de ${tipoFiltro}`,
+                        data: dataValues,
+                        backgroundColor: generarColores(labels.length),
+                        borderWidth: 1
+                    }]
+                };
+                chartOptions.scales = {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
                         }
                     }
                 };
-
-                // Configuraciones específicas para cada tipo de gráfica
-                if (tipoGraficaSeleccionada === 'pie') {
-                    chartData = {
-                        labels: labels,
-                        datasets: [{
-                            data: dataValues,
-                            backgroundColor: generarColores(labels.length),
-                            borderWidth: 2,
-                            borderColor: '#fff',
-                        }]
-                    };
-                    
-                    // Configuración específica para gráficos circulares
-                    chartOptions.plugins.datalabels = {
-                        display: true,
-                        color: '#fff',
-                        font: {
-                            weight: 'bold',
-                            size: 14
-                        },
-                        formatter: function(value, context) {
-                            return percentages[context.dataIndex];
-                        }
-                    };
-                    
-                    // Ajustes adicionales para pie chart
-                    chartOptions.layout.padding = {
-                        top: 10,
-                        bottom: 10,
-                        left: 10,
-                        right: 10
-                    };
-
-                    chartOptions.aspectRatio = 1.2; // Más ancha que alta
-                    chartOptions.maintainAspectRatio = true;
-
-                } else if(tipoGraficaSeleccionada === 'doughnut') {
-                    chartData = {
-                        labels: labels,
-                        datasets: [{
-                            data: dataValues,
-                            backgroundColor: generarColores(labels.length),
-                            borderWidth: 2,
-                            borderColor: '#fff',
-                        }]
-                    };
-                    
-                    chartOptions.cutout = '45%'; // Esto define el tamaño del agujero (50% es el estándar)
-
-                    // Configuración específica para gráficos circulares
-                    chartOptions.plugins.datalabels = {
-                        display: true,
-                        color: '#fff',
-                        font: {
-                            weight: 'bold',
-                            size: 14
-                        },
-                        formatter: function(value, context) {
-                            return percentages[context.dataIndex];
-                        }
-                    };
-                    
-                    // Ajustes adicionales para doughnut chart
-                    chartOptions.layout.padding = {
-                        top: 10,
-                        bottom: 10,
-                        left: 10,
-                        right: 10
-                    };
-
-                    chartOptions.aspectRatio = 1.2; // Más ancha que alta
-                    chartOptions.maintainAspectRatio = true;
-                    
-                } else if (tipoGraficaSeleccionada === 'bar') {
-                    chartData = {
-                        labels: labels,
-                        datasets: [{
-                            label: `Total de ${tipoFiltro}`,
-                            data: dataValues,
-                            backgroundColor: generarColores(labels.length),
-                            borderWidth: 1
-                        }]
-                    };
-                    chartOptions.scales = {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
-                    };
-                    
-                    // Para gráficos de barra, mostrar porcentaje en tooltip y encima de las barras
-                    chartOptions.plugins.datalabels = {
-                        display: true,
-                        anchor: 'end',
-                        align: 'top',
-                        color: '#333',
-                        font: {
-                            weight: 'bold',
-                            size: 11
-                        },
-                        formatter: function(value, context) {
-                            return percentages[context.dataIndex];
-                        }
-                    };
-                    
-                    // Ajustes para bar chart
-                    chartOptions.layout.padding = {
-                        top: 20,
-                        bottom: 20,
-                        left: 15,
-                        right: 15
-                    };
-                    
-                } else if (tipoGraficaSeleccionada === 'line') {
-                    chartData = {
-                        labels: labels,
-                        datasets: [{
-                            label: `Total de ${tipoFiltro}`,
-                            data: dataValues,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    };
-                    chartOptions.scales = {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
-                    };
-                    
-                    // Para gráficos de línea, mostrar porcentaje en los puntos
-                    chartOptions.plugins.datalabels = {
-                        display: true,
-                        align: 'top',
-                        color: '#333',
-                        font: {
-                            weight: 'bold',
-                            size: 11
-                        },
-                        formatter: function(value, context) {
-                            return percentages[context.dataIndex];
-                        }
-                    };
-                    
-                    // Ajustes para line chart
-                    chartOptions.layout.padding = {
-                        top: 20,
-                        bottom: 20,
-                        left: 15,
-                        right: 15
-                    };
-                }
                 
-                window.myChart = new Chart(ctx, {
-                    type: tipoGraficaSeleccionada,
-                    data: chartData,
-                    options: chartOptions,
-                    plugins: [ChartDataLabels]
-                });
+                // Para gráficos de barra, mostrar porcentaje en tooltip y encima de las barras
+                chartOptions.plugins.datalabels = {
+                    display: true,
+                    anchor: 'end',
+                    align: 'top',
+                    color: '#333',
+                    font: {
+                        weight: 'bold',
+                        size: 11
+                    },
+                    formatter: function(value, context) {
+                        return percentages[context.dataIndex];
+                    }
+                };
+                
+                // Ajustes para bar chart
+                chartOptions.layout.padding = {
+                    top: 20,
+                    bottom: 20,
+                    left: 15,
+                    right: 15
+                };
+                
+            } else if (tipoGraficaSeleccionada === 'line') {
+                chartData = {
+                    labels: labels,
+                    datasets: [{
+                        label: `Total de ${tipoFiltro}`,
+                        data: dataValues,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                };
+                chartOptions.scales = {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                };
+                
+                // Para gráficos de línea, mostrar porcentaje en los puntos
+                chartOptions.plugins.datalabels = {
+                    display: true,
+                    align: 'top',
+                    color: '#333',
+                    font: {
+                        weight: 'bold',
+                        size: 11
+                    },
+                    formatter: function(value, context) {
+                        return percentages[context.dataIndex];
+                    }
+                };
+                
+                // Ajustes para line chart
+                chartOptions.layout.padding = {
+                    top: 20,
+                    bottom: 20,
+                    left: 15,
+                    right: 15
+                };
             }
-        });
+            
+            window.myChart = new Chart(ctx, {
+                type: tipoGraficaSeleccionada,
+                data: chartData,
+                options: chartOptions,
+                plugins: [ChartDataLabels]
+            });
+        }
     });
+});
     function generarColores(cantidad) {
         const colores = [];
         const hueStep = 360 / cantidad;
@@ -1127,6 +1204,7 @@ function actualizarTablaConFiltros(filtros) {
             Datos: window.datosGrafica,
             Total: window.totalGrafica,
             nombreGrafica: Nombre_de_la_grafica,
+            subtitulo: window.subtitulo,
             fecha: new Date().toLocaleDateString('es-MX'),  // "15/01/2024"
             hora: new Date().toLocaleTimeString('es-MX'),   // "14:30:25"
             imagenGrafica: base64Image,

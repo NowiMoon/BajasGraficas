@@ -10,6 +10,7 @@ class PDFController extends Controller
 {
     public function downloadPDF(Request $request)
     {
+
         try {
             $user = Auth::user();
             $rol = match ($user->user_type) {
@@ -21,6 +22,7 @@ class PDFController extends Controller
             $datosGrafica = $request->input('Datos', []);
             $totalGrafica = $request->input('Total', 0);
             $nombreGrafica = $request->input('nombreGrafica', 'Gráfica sin título');
+            $subtitulo = $request->input('subtituloGrafica', ''); // Nuevo campo
             $imagenGrafica = $request->input('imagenGrafica');
             $fecha = $request->input('fecha', now()->format('d/m/Y'));
             $hora = $request->input('hora', now()->format('H:i:s'));
@@ -29,10 +31,13 @@ class PDFController extends Controller
                 'fecha'              => $fecha,
                 'hora'               => $hora,
                 'nombreGrafica'      => $nombreGrafica,
+                'subtitloGrafica'    => $subtitulo,
                 'imagenGrafica'      => $imagenGrafica,
-                'datosGrafica'       => $datosGrafica,  // Nuevo: datos de la gráfica
-                'totalGrafica'       => $totalGrafica,  // Nuevo: total de registros
+                'datosGrafica'       => $datosGrafica,
+                'totalGrafica'       => $totalGrafica,
             ];
+
+            Log::info($subtitulo);
 
             // MUY IMPORTANTE: validar que sea base64 con prefijo válido
             if (str_starts_with($data['imagenGrafica'], 'data:image')) {
