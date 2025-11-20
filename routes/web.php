@@ -16,20 +16,25 @@ use App\Http\Controllers\BotonesController;
 Route::get('/', function () {
     if (Auth::check()) {
         if (Auth::User()->hasRole('admin')) {
-            return redirect()->route('dashboard');
+            return redirect()->route('register');
         } elseif (Auth::User()->hasRole('coordinador')) {
             return redirect()->route('dashboard');
         } elseif (Auth::User()->hasRole('trabajador')) {
             return redirect()->route('dashboard');
         }
-        // Otros roles si aplica
     }
     return redirect()->route('login');
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
+    // si es admin (user_type === 1) redirige a register
+    if (Auth::check() && Auth::user()->user_type === 1) {
+        return redirect()->route('register');
+    }
+
+    // pasar el Request al controlador
+    return app(\App\Http\Controllers\DashboardController::class)->index($request);
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::post('/descargar-pdf', [PDFController::class, 'downloadPDF'])->name('downloadPDF');
@@ -44,6 +49,13 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::post('register', [RegisteredUserController::class, 'store']);
 });
 
+Route::patch('/users/{user}/toggle', [RegisteredUserController::class, 'toggle'])
+    ->middleware(['auth','admin'])
+    ->name('users.toggle');
+
+Route::post('/users/{user}/reset-password', [RegisteredUserController::class, 'resetPassword'])
+    ->middleware(['auth','admin'])
+    ->name('users.reset');
 
 // Rutas del Coordinador
 Route::group(['middleware' => ['auth', 'coordinador']], function () {
@@ -70,11 +82,12 @@ Route::get('/enviar', [ExcelController::class, 'enviarLista']);
 Route::get('/recibir', [RecibirJsonController::class, 'recibirJson'])->name('recibirJson');
 
 //-----------------------------------------------------------------------------------------------------------------
+
 Route::post('/Preparar-datos', [PrepararDatosController::class, 'Preparar_Datos'])->name('Preparar_Datos');
 Route::get('/get-data', [GraficoController::class, 'getData'])->name('get.data');
 Route::get('/api/materias', [BotonesController::class, 'materias']);
 Route::get('/api/trabajos', [BotonesController::class, 'trabajos']);
 Route::get('/api/escuelas', [BotonesController::class, 'escuelas']);
 Route::get('/api/generaciones', [BotonesController::class, 'generation']);
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+//Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 require __DIR__.'/auth.php';

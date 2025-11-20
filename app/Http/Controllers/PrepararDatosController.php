@@ -20,6 +20,7 @@ class PrepararDatosController extends Controller
 
         $todosLosResultados = $request->resultados;
         $cont_actualizado = 0;
+        //guardamos los registros en una lista para manejarlos
 
         $entrada = [];
         $coincidencia = [];
@@ -30,9 +31,8 @@ class PrepararDatosController extends Controller
         }
 
         $count = count($datos[0]);
-        $u = 'Datos que deben de ser: ' . $count . ' y Datos actualizados: ' . $cont_actualizado;
        
-        //llamar la funcion de datos actualizados
+        //llamar la funcion de datos actualizados, la api lo devuelve en una lista y hay que separarlo
         $Datos_Actualizados = $this->PreparaDatosActualizados($coincidencia,$count);
 
         //----------- Ejemplo ------------    
@@ -71,14 +71,15 @@ class PrepararDatosController extends Controller
         $empresa = $Datos_Actualizados[2];
         $titulacion = $datos[11];
 
+        //preparamos en el orden de la tabla los valores para insertarlos en la bd
+
         if($datos[13] === 0)
         {
             $mat3 = array_fill(0, $count, null);
         }
 
-        //$jason = json_encode($Datos_Insersion, JSON_PRETTY_PRINT);
-        //Storage::put('Datos.json', $jason);  
-
+        //registro por registro insertamos en la bd
+        //sin duplicados, ya con la materia, escuela y trabajo normalizado
         for ($i = 0; $i < $count; $i++) 
         {
             $datos = [
@@ -106,46 +107,7 @@ class PrepararDatosController extends Controller
 
 
         return response()->json(['mensaje' => $count . ' registros guardados correctamente']);
-        
-        /*$alumno = new Alumno();
-        $alumno->Anio = (int)$lista_anio[$i];
-        $alumno->Id_Reg_A = (int)$datos[0][$i];
-        $alumno->Cv_Alumno = (int)$datos[1][$i];
-        $alumno->Nombre_Alumno = $datos[2][$i];
-        $alumno->Gen = (int)$resultado[$i];
-        $alumno->Carrera = $datos[4][$i];
-        $alumno->email = $datos[5][$i];
-        $alumno->Mat_1 = $Datos_Actualizados[0][$i];
-        $alumno->Mat_2 = $datos[12][$i]; 
-        $alumno->Mat_3 = $datos[13][$i];
-        $alumno->Escuela = $Datos_Actualizados[1][$i];
-        $alumno->TBaja = $datos[8][$i];
-        $alumno->Inc_Carr = $datos[9][$i];
-        $alumno->Empresa = $Datos_Actualizados[2][$i];
-        $alumno->Titulacion = $datos[11][$i];
-        $alumno->created_at = now();
-        $alumno->updated_at = now();
-        $alumno->save();*/
-
-         /*DB::table('alumnos')->insert([
-            'Anio' => (int)$lista_anio[$i],
-            'Id_Reg_A' => (int)$datos[0][$i],
-            'Cv_Alumno' => (int)$datos[1][$i],
-            'Nombre_Alumno' => $datos[2][$i],
-            'Gen' => (int)$resultado[$i],
-            'Carrera' => $datos[4][$i],
-            'email' => $datos[5][$i],
-            'Mat_1' => $Datos_Actualizados[0][$i],
-            'Mat_2' => $datos[12][$i], 
-            'Mat_3' => $datos[13][$i],
-            'Escuela' => $Datos_Actualizados[1][$i],
-            'TBaja' => $datos[8][$i],
-            'Inc_Carr' => $datos[9][$i],
-            'Empresa' => $Datos_Actualizados[2][$i],
-            'Titulacion' => $datos[11][$i],
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);    */
+        //le notificamos al usuario la cantidad de registros insertados
     }
 
     public function PreparaDatosActualizados($coincidencia,$count)
@@ -157,5 +119,7 @@ class PrepararDatosController extends Controller
         $Datos_Actualizados[] = array_slice($coincidencia, ($count*2), $count);
 
         return $Datos_Actualizados;
+
+        //separamos en 3 la lista, cada lista es de un valor diferente
     }
 }

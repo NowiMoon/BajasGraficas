@@ -11,9 +11,27 @@ use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\File;
 
-
 class ExcelController extends Controller
 {
+    private $expectedColumns16 = [
+        'Consecutivo',
+        'Por Año',
+        'Fecha',
+        'Generación',
+        'Alumno',
+        'clave',
+        'correo',
+        'Carta',
+        'Carrera',
+        'Tipo',
+        'Materia_Dificil',
+        'Materia Difícil 2',
+        'Escuela de Procedencia',
+        'Empresa Laboral',
+        'Inconveniente',
+        'Tesis'  // Nueva columna en lugar de las vacías
+    ];
+    
     private $expectedColumns17 = [
         'Consecutivo',
         'Por Año',
@@ -57,25 +75,6 @@ class ExcelController extends Controller
         'Materia Difícil 3'
     ];
 
-    public $c_id_anio = [];
-    public $c_anio_baja = []; //-----------------------------------
-    public $c_clave = [];
-    public $c_nombre = [];
-    public $c_generacion = [];
-    public $c_carrera = [];
-    public $c_email = [];
-    public $c_materias = [];
-    public $c_escuelas = [];
-    public $c_baja = [];
-    public $c_inconveniente = [];
-    public $c_trabajos = [];
-    public $c_titulacion = [];
-    public $c_fecha_egel = [];
-    public $c_mat2 = [];
-    public $c_mat3 = [];
-
-    public $DATOS = [];
-
     public function upload(Request $request)
     {
         mb_internal_encoding('UTF-8');
@@ -98,7 +97,6 @@ class ExcelController extends Controller
         $fechas = array_column($data, $columnIndex);
 
         // Obtener las columnas de la primera fila (encabezados)
-        // Nuevo modelo
         $headers = [];
         foreach ($sheet->getRowIterator(1, 1) as $row) {
             foreach ($row->getCellIterator() as $cell) {
@@ -106,8 +104,7 @@ class ExcelController extends Controller
             }
         }
 
-        // Obtener las columnas de la primera fila (encabezados)
-        // Viejo modelo
+        // Obtener las columnas de la segunda fila (para validación en formato viejo)
         $rows = [];
         foreach ($sheet->getRowIterator(2,2) as $row) { // Comienza desde la segunda fila (datos)
             foreach ($row->getCellIterator() as $cell) {
@@ -119,7 +116,7 @@ class ExcelController extends Controller
         $columnCount = count($headers);
         //dd($columnCount);
 
-        if($columnCount != 17 & $columnCount != 20)
+        if($columnCount != 16 && $columnCount != 17 && $columnCount != 20)
         {
             Log::info('no cumple con las columnas esperadas');
             return back()->withErrors(['file' => 'Archivo no aceptado: ' . 'no cuenta con las columnas esperadas']);
@@ -127,7 +124,39 @@ class ExcelController extends Controller
         
 
         //--------------------------datos basura-----------------------------
-        if($columnCount === 17)
+        if($columnCount === 16)
+        {
+            $c_clave = array_column($data, 5);
+            $c_nombre = array_column($data, 4);
+            $c_generacion = array_column($data, 3);
+            $c_carrera = array_column($data, 8);
+            $c_email = array_column($data, 6);
+            $c_materias = array_column($data, 10);
+            $c_escuelas = array_column($data, 12);
+            $c_baja = array_column($data, 9);
+            $c_inconveniente = array_column($data, 14);
+            $c_trabajos = array_column($data, 13);
+            $c_titulacion = array_column($data, 15); 
+            $c_mat2 = array_column($data, 11);
+            $c_mat3 = 0;
+
+            for ($i = 0; $i < 2; $i++) {
+                array_shift($c_clave);
+                array_shift($c_nombre);
+                array_shift($c_generacion);
+                array_shift($c_carrera);
+                array_shift($c_email);
+                array_shift($c_materias);
+                array_shift($c_escuelas);
+                array_shift($c_baja);
+                array_shift($c_inconveniente);
+                array_shift($c_trabajos);
+                array_shift($c_titulacion);
+                array_shift($c_mat2);
+            }
+ 
+        }
+        elseif($columnCount === 17)
         {
             $c_clave = array_column($data, 5);
             $c_nombre = array_column($data, 4);
@@ -163,7 +192,7 @@ class ExcelController extends Controller
             $c_clave = array_column($data, 6);
             array_shift($c_clave); 
 
-            $c_nombre = array_column($data, 4);
+            $c_nombre = array_column($data, 7);
             array_shift($c_nombre); 
             
             $c_generacion = array_column($data, 8);
@@ -211,14 +240,29 @@ class ExcelController extends Controller
             return $item;
         })->toArray();
 
+        $claves_nuevas = array_map(function($cadena) {
+            return preg_replace("/\D/", "", $cadena);
+        }, $c_clave);
+
+        $generacion_nueva = array_map(function($cadena) {
+            return preg_replace("/\D/", "", $cadena);
+        }, $c_generacion);
+
+        foreach ($generacion_nueva as &$valor) {
+            if (abs($valor) < 1000) {
+                $valor = "20".$valor;
+            }
+        }
+        unset($valor);
+
         $baja_minusculas = array_map('strtolower', $c_baja);
 
         $c_id_anio = $this->ObtenFecha($fechas,$columnCount,$c_generacion);
 
         $DATOS[] = $c_id_anio;
-        $DATOS[] = $c_clave;
+        $DATOS[] = $claves_nuevas;
         $DATOS[] = $c_nombre;
-        $DATOS[] = $c_generacion;
+        $DATOS[] = $generacion_nueva;
         $DATOS[] = $c_carrera;
         $DATOS[] = $c_email;
         $DATOS[] = $materias_truncadas;
@@ -233,7 +277,9 @@ class ExcelController extends Controller
         //--------------------------materias-----------------------------
 
         // Redirigir la lógica según el número de columnas
-        if ($columnCount === 17) {
+        if ($columnCount === 16) {
+            return $this->process16Columns($headers,$DATOS,$umbral);
+        } elseif ($columnCount === 17) {
             return $this->process17Columns($rows,$DATOS,$umbral);
         } elseif ($columnCount === 20) {
            return $this->process20Columns($headers,$DATOS,$umbral);
@@ -241,16 +287,87 @@ class ExcelController extends Controller
             return back()->withErrors(['file' => 'Archivo no aceptado: ' . $columnCount]);
         }
     }
+
+    private function process16Columns($headers,$DATOS,$umbral)
+    {
+        // Comparar los nombres de las columnas con los esperados
+        $missingColumns = array_diff($this->expectedColumns16, $headers);
+        $extraColumns = array_diff($headers, $this->expectedColumns16);
+    
+        if (!empty($missingColumns) || !empty($extraColumns)) {
+            $errorMessage = 'El archivo no cumple con las columnas esperadas.';
+            return back()->withErrors(['file' => $errorMessage]);
+        }
+
+        Log::info('=== DEBUG process16Columns ===');
+        Log::info('DATOS recibido:', ['count' => is_countable($DATOS) ? count($DATOS) : 'No contable']);
+
+        // LIMPIAR DATOS ANTES de json_encode
+        $DATOS = $this->limpiarYRepararUtf8($DATOS);
+
+        // DEBUG: Verificar después de limpiar
+        Log::info('Después de limpieza - Primer elemento:', isset($DATOS[0]) ? $DATOS[0] : 'No hay elemento 0');
+
+        $json = json_encode($DATOS, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        
+        if ($json === false) {
+            Log::error('Error json_encode después de limpieza:', ['error' => json_last_error_msg()]);
+            
+            // Fallback: intentar con opciones más permisivas
+            $json = json_encode($DATOS, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_IGNORE);
+            
+            if ($json === false) {
+                Log::error('Fallback también falló');
+                return back()->withErrors(['file' => 'Error al convertir datos a JSON']);
+            }
+        }
+
+        $rutaCompleta = storage_path('app/private/json/lista.json');
+        $directorio = dirname($rutaCompleta);
+        
+        if (!File::exists($directorio)) {
+            File::makeDirectory($directorio, 0755, true);
+        }
+        
+        $resultado = File::put($rutaCompleta, $json);
+        
+        Log::info('File::put resultado:', [
+            'éxito' => $resultado !== false,
+            'bytes_escritos' => $resultado,
+            'ruta' => $rutaCompleta
+        ]);
+
+        if ($resultado === false) {
+            return back()->withErrors(['file' => 'No se pudo escribir el archivo']);
+        }
+
+        Log::info('16 columnas - Archivo guardado exitosamente');
+        return app('App\Http\Controllers\RecibirJsonController')->recibirJson($umbral);
+    }
     
     private function process17Columns($headers,$DATOS,$umbral)
     {
+        $headers = array_map('trim', $headers);
+        $expected = array_map('trim', $this->expectedColumns17);
+        
+        // Comparar solo las columnas no vacías esperadas
+        $nonEmptyExpected = array_filter($expected, function($value) {
+            return $value !== '';
+        });
+        
+        $nonEmptyHeaders = array_filter($headers, function($value) {
+            return $value !== '';
+        });
         // Comparar los nombres de las columnas con los esperados
         $missingColumns = array_diff($this->expectedColumns17, $headers);
         $extraColumns = array_diff($headers, $this->expectedColumns17);
     
         if (!empty($missingColumns) || !empty($extraColumns)) {
-            $errorMessage = 'El archivo no cumple con las columnas esperadas.';
-            return back()->withErrors(['file' => $errorMessage]);
+            Log::error('Validación fallida - Columnas esperadas:', $nonEmptyExpected);
+            Log::error('Columnas recibidas:', $nonEmptyHeaders);
+            Log::error('Columnas faltantes:', $missingColumns);
+            Log::error('Columnas extra:', $extraColumns);
+            return back()->withErrors(['file' => 'El archivo no cumple con las columnas esperadas.']);
         }
 
         Log::info('=== DEBUG process17Columns ===');
@@ -374,7 +491,7 @@ class ExcelController extends Controller
         $col_fecha = [];
         $count = 1;
 
-        if($columnCount == 17)
+        if($columnCount == 16 || $columnCount == 17)
         {
             array_shift($fechas);
             array_shift($fechas); 

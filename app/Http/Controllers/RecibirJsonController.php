@@ -25,9 +25,11 @@ class RecibirJsonController extends Controller
                     'message' => 'Archivo lista.json no encontrado'
                 ], 404);
             }
+            //Verificar la existencia del json donde guardamos los datos
 
             $json = Storage::get($rutaArchivo);
             $datos = json_decode($json, true);
+            //guardamos los registros del json en datos
 
             if (!isset($datos[0])) {
                 Log::info($datos);
@@ -39,6 +41,7 @@ class RecibirJsonController extends Controller
 
             $lista_deseada = $datos[0];
             $aux_id_anio = Alumno::pluck('Id_Reg_A')->toArray();
+            //guardamos en una lista los id unicos que existen en la bd 
             $cont = 0;
 
             if (!is_array($datos[13])) {
@@ -60,12 +63,13 @@ class RecibirJsonController extends Controller
                     }
                 }
             }
-
-            Log::info('recibir jason');
+            //comparamos los id unicos de la bd y eliminamos los duplicados
+            //solo necesitamos normalizar los registros nuevos
 
             $json = json_encode($datos, JSON_PRETTY_PRINT);
             $ruta = 'json/lista_sin_duplicados.json';
             Storage::put($ruta, $json);
+            //guardamos los datos sin duplicados en otro json
 
             if (count($datos[0]) === 0){
                 return response()->json([
@@ -73,6 +77,7 @@ class RecibirJsonController extends Controller
                     'message' => 'Los valores son válidos, pero ya existen en la base de datos',
                     'codigo' => 'DUPLICADOS' // Nuevo campo identificador
                 ]);
+                //avisamos al usuario si todos los datos son suplicados
             }
 
             $mi_valor = 'Se ingresaron: ' . count($lista_deseada) . ' registros nuevos de ' . $cont;
@@ -82,6 +87,7 @@ class RecibirJsonController extends Controller
                     'success' => false,
                     'message' => 'Error al crear archivo sin duplicados'
                 ], 500);
+                //avisamos al usuario si courrió algún error
             }
 
             $json = Storage::get($ruta);
@@ -90,9 +96,13 @@ class RecibirJsonController extends Controller
             $entradas_Materias = $datos[6] ?? [];
             $entradas_Escuelas = $datos[7] ?? [];
             $entradas_Trabajos = $datos[10] ?? [];
+            //guardamos las materias, escuelas y trabajos en listas separadas
+            //las usaremos para trabajar en la api
 
             $materias_bd = Materia::pluck('nombre_materia')->toArray();
             Log::info($materias_bd);
+            //obtenemos una lista de las materias existentes en la bd
+            //la api usará esta informacion como base
 
             for($tipo = 1; $tipo < 4; $tipo++) {
                 $mController = new MateriaController();
@@ -126,6 +136,7 @@ class RecibirJsonController extends Controller
                 }
 
                 $Datos_Nuevos[] = $response->getData()->resultado;
+                //mandamos la informacion a la api y los resultados los guardamos en una lista
             }
 
             return $this->guardar_datos($Datos_Nuevos);
@@ -142,6 +153,7 @@ class RecibirJsonController extends Controller
 
     private function guardar_datos($Datos)
     {
+        //una vez obtenidos los datos normalizados de manera correcta, los guardamos en otro json
         try {
             $json = json_encode($Datos, JSON_PRETTY_PRINT);
             $ruta = 'json/ejemplo.json';

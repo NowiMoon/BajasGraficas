@@ -9,6 +9,7 @@ class BotonesController extends Controller
 {
         public function materias()
         {
+            //consulta para obtener las materias de la base de datos
             return response()->json(Alumno::whereNotNull('Mat_1')
             ->pluck('Mat_1')
             ->unique()
@@ -18,6 +19,7 @@ class BotonesController extends Controller
 
         public function trabajos()
         {
+            //consulta para obtener las empresas de la base de datos
             return response()->json(Alumno::whereNotNull('Empresa')
             ->pluck('Empresa')
             ->unique()
@@ -27,6 +29,7 @@ class BotonesController extends Controller
 
         public function escuelas()
         {
+            //consulta para obtener las mescuelas de la base de datos
             return response()->json(Alumno::whereNotNull('Escuela')
             ->pluck('Escuela')
             ->unique()
@@ -34,8 +37,9 @@ class BotonesController extends Controller
             ->all());
         }
 
-        public function generation()  // ✅ CORRECTO: función separada
+        public function generation()
         {
+            //consulta para obtener las generaciones de la base de datos
             $generaciones = Alumno::whereNotNull('Gen')
                 ->pluck('Gen')
                 ->unique()
