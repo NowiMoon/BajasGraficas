@@ -16,11 +16,11 @@
                     <div class="d-flex flex-column">
                         <div class="py-4 d-flex align-items-center">
                             <label for="clave_materia" class="w-25">Clave materia: *</label>
-                            <input class="form-control w-50" type="number" id="clave_materia" name="clave_materia" placeholder="Clave de la materia" required>
+                            <input class="form-control w-50" type="number" id="clave_materia" name="clave_materia" placeholder="Clave de la materia" maxlength="10" min="0" max="9999999999" required>
                         </div>
                         <div class="pb-4 align-items-center d-flex">
                             <label for="nombre_materia" class="w-25">Nombre materia: *</label>
-                            <input class="form-control w-50" type="text" id="nombre_materia" name="nombre_materia" placeholder="Nombre de la materia" required>
+                            <input class="form-control w-50" type="text" id="nombre_materia" name="nombre_materia" placeholder="Nombre de la materia" maxlength="30" required>
                         </div>
                     </div>
                     <div class="text-end">
@@ -50,8 +50,8 @@
 </div>
 
 @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @if(session('success'))
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             Swal.fire({
                 icon: 'success',
@@ -63,15 +63,78 @@
     @endif
 
     @if(session('error'))
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: '{{ session('error') }}',
+                text: '{{ session('error') }}', 
                 confirmButtonText: 'Aceptar'
             });
         </script>
     @endif
+
+    <script>
+        // Limitar clave_materia a 10 dígitos
+        document.getElementById('clave_materia').addEventListener('input', function (e) {
+            if (this.value.length > 10) {
+                this.value = this.value.slice(0, 10);
+            }
+        });
+
+        // SweetAlert al subir archivo CSV
+        document.querySelector('form[action="upload_subjects"]').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Procesando archivo...',
+                text: 'Por favor espera mientras se procesa el archivo.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Crear FormData y enviar por AJAX
+            var formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.close();
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: data.message,
+                        confirmButtonText: 'Aceptar'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                        confirmButtonText: 'Aceptar'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ocurrió un error al procesar el archivo.',
+                    confirmButtonText: 'Aceptar'
+                });
+            });
+        });
+    </script>
 @endsection
 @endsection
