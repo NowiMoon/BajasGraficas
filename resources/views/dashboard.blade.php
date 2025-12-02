@@ -132,7 +132,7 @@
                                         <div class="mb-2">
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input filtro-unico" type="radio" name="temaGrafica" id="trabajoCheckbox" value="trabajo" style="transform: scale(1.2); border: 2px solid #004A98;">
-                                                <label class="form-check-label fw-semibold small ms-2" for="trabajoCheckbox" style="color: #2c3e50;">Lugar donde labura</label>
+                                                <label class="form-check-label fw-semibold small ms-2" for="trabajoCheckbox" style="color: #2c3e50;">Lugar donde labora</label>
                                             </div>
                                         </div>
                                     </div>

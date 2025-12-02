@@ -168,6 +168,8 @@ class GraficoController extends Controller
                     $registros->where('Escuela', $escuela);}
                 if ($carrera !== 'todas') {
                     $registros->where('Carrera', $carrera);}
+                if ($baja !== 'todas') {
+                    $registros->where('Tbaja', $baja);}
                 if ($tipoTitulacion !== 'todas') {
                     $registros->where('Titulacion', $tipoTitulacion);}
                 if ($trabajo !== 'todas') {
