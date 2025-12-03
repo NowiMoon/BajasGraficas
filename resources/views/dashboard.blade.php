@@ -10,7 +10,6 @@
             <a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href="{{ route('register') }}">
                 <img src="{{ asset('images/users_icon.svg') }}" alt="Usuarios">Gestion de Usuarios
             </a>
-            <hr style="width: 80%; border: 3px solid #00B2E3; margin: 0 auto;">
             @endif
             @if ( Auth::user()->user_type == 2 )
             <a class="d-block icon-item text-center" style="text-decoration: none; color: black;" href=" {{ route('gestion_materias') }} ">
@@ -355,6 +354,14 @@
                                             <i class="fas fa-sort ms-1 small"></i>
                                         </div>
                                     </th>
+                                    @if(Auth::user()->user_type == 1)
+                                    <th style="background: linear-gradient(135deg, #00B2E3, #0088cc); color: white; font-weight: 600; font-size: 0.85rem; padding: 12px 8px; border: none;">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span>Eliminar</span>
+                                            <i class="fas fa-sort ms-1 small"></i>
+                                        </div>
+                                    </th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -408,6 +415,18 @@
                                         <td style="padding: 10px 8px; font-size: 0.8rem;">
                                             {{ $alumno->Titulacion }}
                                         </td>
+                                        @if(Auth::user()->user_type == 1)
+                                        <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
+                                            <form method="POST" action="{{ route('alumnos.destroy', $alumno->Id_Registro) }}"
+                                                  class="delete-form d-inline"
+                                                  data-id="{{ $alumno->Id_Registro }}"
+                                                  data-name="{{ $alumno->Nombre_Alumno }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                            </form>
+                                        </td>
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -1064,204 +1083,81 @@ $('#generarGraficaBtn').on('click', function() {
         return colores;
     }
 
-    // Función para actualizar la tabla con los filtros aplicados
-function actualizarTablaConFiltros(filtros) {
-    $.ajax({
-        url: "{{ route('dashboard') }}",
-        method: 'GET',
-        data: filtros,
-        success: function(response) {
-            // Reemplazar el tbody de la tabla con los nuevos datos
-            const tbody = $('#resultadosFinalesTable tbody');
-            tbody.empty();
-            
-            if (response.alumnos.length > 0) {
-                response.alumnos.forEach(function(alumno) {
-                    const row = `
-                        <tr style="transition: all 0.2s ease; border-bottom: 1px solid #e9ecef;">
-                            <td class="fw-medium text-center" style="padding: 10px 8px; font-size: 0.8rem; background-color: #f8f9fa; border-right: 1px solid #e9ecef;">
-                                ${alumno.Id_Registro}
-                            </td>
-                            <td class="text-center" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
-                                ${alumno.Anio}
-                            </td>
-                            <td class="fw-medium text-center" style="padding: 10px 8px; font-size: 0.8rem; background-color: #f8f9fa; border-right: 1px solid #e9ecef;">
-                                ${alumno.Id_Reg_A}
-                            </td>
-                            <td class="text-primary fw-bold text-center" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
-                                ${alumno.Cv_Alumno}
-                            </td>
-                            <td class="fw-semibold" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
-                                ${alumno.Nombre_Alumno}
-                            </td>
-                            <td class="text-center" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
-                                ${alumno.Gen}
-                            </td>
-                            <td class="fw-medium" style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
-                                ${alumno.Carrera}
-                            </td>
-                            <td class="text-truncate" style="padding: 10px 8px; font-size: 0.8rem; max-width: 150px; border-right: 1px solid #e9ecef;" title="${alumno.email}">
-                                ${alumno.email}
-                            </td>
-                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
-                                ${alumno.Mat_1}
-                            </td>
-                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
-                                ${alumno.Mat_2}
-                            </td>
-                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
-                                ${alumno.Mat_3}
-                            </td>
-                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
-                                ${alumno.Escuela}
-                            </td>
-                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
-                                ${alumno.TBaja}
-                            </td>
-                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
-                                ${alumno.Inc_Carr}
-                            </td>
-                            <td style="padding: 10px 8px; font-size: 0.8rem; border-right: 1px solid #e9ecef;">
-                                ${alumno.Empresa}
-                            </td>
-                            <td style="padding: 10px 8px; font-size: 0.8rem;">
-                                ${alumno.Titulacion}
-                            </td>
+    // Variables JS renderizadas por Blade (usadas por la función JS)
+    const isAdmin = {{ Auth::check() && Auth::user()->user_type === 1 ? 'true' : 'false' }};
+    const deleteUrlTemplate = "{{ route('alumnos.destroy', ['id' => 'ID_PLACEHOLDER']) }}";
+    const csrfInputs = '<input type="hidden" name="_token" value="{{ csrf_token() }}">' +
+                       '<input type="hidden" name="_method" value="DELETE">';
+
+    // Reemplaza la implementación anterior de actualizarTablaConFiltros por esta
+    function actualizarTablaConFiltros(filtros) {
+        $.ajax({
+            url: "{{ route('dashboard') }}",
+            method: 'GET',
+            data: filtros,
+            success: function(response) {
+                const tbody = $('#resultadosFinalesTable tbody');
+                tbody.empty();
+
+                if (response.alumnos && response.alumnos.length > 0) {
+                    response.alumnos.forEach(function(alumno) {
+                        let actionHtml = '';
+                        if (isAdmin === true || isAdmin === 'true') {
+                            const actionUrl = deleteUrlTemplate.replace('ID_PLACEHOLDER', alumno.Id_Registro);
+                            actionHtml = `
+                                <td style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">
+                                    <form method="POST" action="${actionUrl}"
+                                          class="delete-form d-inline"
+                                          data-id="${alumno.Id_Registro}"
+                                          data-name="${alumno.Nombre_Alumno}">
+                                        ${csrfInputs}
+                                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                    </form>
+                                </td>
+                            `;
+                        }
+
+                        const row = `
+                            <tr style="transition: all 0.2s ease; border-bottom: 1px solid #e9ecef;">
+                                <td class="fw-medium text-center" style="padding:10px 8px; font-size:0.8rem; background-color:#f8f9fa; border-right:1px solid #e9ecef;">${alumno.Id_Registro}</td>
+                                <td class="text-center" style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">${alumno.Anio}</td>
+                                <td class="fw-medium text-center" style="padding:10px 8px; font-size:0.8rem; background-color:#f8f9fa; border-right:1px solid #e9ecef;">${alumno.Id_Reg_A}</td>
+                                <td class="text-primary fw-bold text-center" style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">${alumno.Cv_Alumno}</td>
+                                <td class="fw-semibold" style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">${alumno.Nombre_Alumno}</td>
+                                <td class="text-center" style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">${alumno.Gen}</td>
+                                <td class="fw-medium" style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">${alumno.Carrera}</td>
+                                <td class="text-truncate" style="padding:10px 8px; font-size:0.8rem; max-width:150px; border-right:1px solid #e9ecef;" title="${alumno.email}">${alumno.email}</td>
+                                <td style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">${alumno.Mat_1}</td>
+                                <td style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">${alumno.Mat_2}</td>
+                                <td style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">${alumno.Mat_3}</td>
+                                <td style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">${alumno.Escuela}</td>
+                                <td style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">${alumno.TBaja}</td>
+                                <td style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">${alumno.Inc_Carr}</td>
+                                <td style="padding:10px 8px; font-size:0.8rem; border-right:1px solid #e9ecef;">${alumno.Empresa}</td>
+                                <td style="padding:10px 8px; font-size:0.8rem;">${alumno.Titulacion}</td>
+                                ${actionHtml}
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+
+                    $('#mensaje').text(`Mostrando ${response.alumnos.length} registros filtrados`);
+                } else {
+                    const colSpan = (isAdmin === true || isAdmin === 'true') ? 19 : 18;
+                    tbody.append(`
+                        <tr>
+                            <td colspan="${colSpan}" class="text-center text-muted py-4">No se encontraron registros con los filtros aplicados</td>
                         </tr>
-                    `;
-                    tbody.append(row);
-                });
-                
-                // Mostrar mensaje de resultados
-                $('#mensaje').text(`Mostrando ${response.alumnos.length} registros filtrados`);
-            } else {
-                tbody.append(`
-                    <tr>
-                        <td colspan="16" class="text-center text-muted py-4">
-                            No se encontraron registros con los filtros aplicados
-                        </td>
-                    </tr>
-                `);
-                $('#mensaje').text('No se encontraron registros con los filtros aplicados');
+                    `);
+                    $('#mensaje').text('No se encontraron registros con los filtros aplicados');
+                }
+            },
+            error: function() {
+                Swal.fire({ title: 'Error', text: 'Error al cargar los datos filtrados', icon: 'error', confirmButtonText: 'Aceptar' });
             }
-        },
-        error: function() {
-            Swal.fire({
-                title: 'Error',
-                text: 'Error al cargar los datos filtrados',
-                icon: 'error',
-                confirmButtonText: 'Aceptar'
-            });
-        }
-    });
-}
-//----------------------------------------------------------------------------------------------------------------------------
-    $('#btnDownloadPDF').on('click', function () {
-    // Obtener el canvas y la imagen base64
-    let canvas = document.getElementById('dataChart');
-    let base64Image = canvas.toDataURL('image/png');
-
-    if (!window.datosGrafica || Object.keys(window.datosGrafica).length === 0 || window.totalGrafica === 0) {
-        Swal.fire({
-            title: 'Error',
-            text: 'No hay datos en el gráfico para generar el PDF. Primero genera una gráfica válida.',
-            icon: 'error',
-            confirmButtonText: 'Aceptar'
         });
-        return;
     }
-
-    // Verificar si hay datos en el gráfico (asumiendo que usas Chart.js)
-    const chartInstance = Chart.getChart(canvas);
-    if (!chartInstance || chartInstance.data.datasets.every(dataset => dataset.data.length === 0)) {
-        Swal.fire({
-            title: 'Error',
-            text: 'No hay datos en el gráfico para generar el PDF.',
-            icon: 'error',
-            confirmButtonText: 'Aceptar'
-        });
-        return;
-    }
-
-    // Mostrar mensaje de "Generando reporte" después de verificar que hay datos
-    Swal.fire({
-        title: 'Generando reporte',
-        text: 'Se está generando su reporte, por favor espere...',
-        icon: 'info',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-
-    fetch("{{ route('downloadPDF') }}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-        },
-        body: JSON.stringify({
-            Datos: window.datosGrafica,
-            Total: window.totalGrafica,
-            nombreGrafica: Nombre_de_la_grafica,
-            subtitulo: window.subtitulo,
-            fecha: new Date().toLocaleDateString('es-MX'),  // "15/01/2024"
-            hora: new Date().toLocaleTimeString('es-MX'),   // "14:30:25"
-            imagenGrafica: base64Image,
-        }),
-    })
-    .then(response => {
-        if (!response.ok) return response.json().then(err => { throw new Error(err.detalle || 'Error al generar el PDF'); });
-        return response.blob();
-    })
-    .then(blob => {
-
-        // Cerrar el mensaje de "Generando reporte"
-        Swal.close();
-
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "reporte.pdf";
-        a.click();
-        window.URL.revokeObjectURL(url);
-
-        // Notificación de éxito
-        Swal.fire({
-            title: '¡PDF descargado!',
-            text: 'El reporte se descargó correctamente.',
-            icon: 'success',
-            confirmButtonText: 'Aceptar'
-        });
-    })
-    .catch(error => {
-        // Notificación de error
-        // Cerrar el mensaje de "Generando reporte"
-        Swal.close();
-
-        Swal.fire({
-            title: 'Error',
-            text: error.message || 'No se pudo generar el archivo PDF',
-            icon: 'error',
-            confirmButtonText: 'Aceptar'
-        });
-        console.error('Error:', error);
-    });
-});
-
-//____________________boton de limpiar-------------------
-
-$('#limpiarFiltrosBtn').on('click', function() {
-    // Limpiar todos los filtros
-    $('.filtro-unico').prop('checked', false).prop('disabled', false);
-    $('#baja, #Carrera, #escuela, #materia, #trabajo, #tipo_titulacion').val('todas');
-    $('#anio_1, #anio_2').val('');
-    
-    // Recargar la tabla con todos los datos
-    location.reload();
-});
-    
-//------------------------------------------------------------------------------------------------------------------------------
+    // ...existing code...
 
     // Explicación del umbral con SweetAlert2
     $('#infoUmbralBtn').click(function() {
@@ -1510,6 +1406,42 @@ $('#limpiarFiltrosBtn').on('click', function() {
     });
 });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Delegación: captura clicks en botones de eliminación dentro de formularios .delete-form
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.delete-form button[type="submit"], .delete-form .btn-danger');
+        if (!btn) return;
 
+        e.preventDefault();
+        const form = btn.closest('.delete-form');
+        const name = form?.dataset?.name || 'este registro';
+
+        // Asegurar que Swal exista
+        if (typeof Swal === 'undefined') {
+            // fallback: confirmar nativo si SweetAlert no cargó
+            if (confirm(`¿Deseas eliminar "${name}"?`)) {
+                form.submit();
+            }
+            return;
+        }
+
+        Swal.fire({
+            title: '¿Confirmar eliminación?',
+            text: `¿Deseas eliminar "${name}"? Esta acción no se puede deshacer.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // enviar el formulario (submit normal para mantener CSRF y redirección)
+                form.submit();
+            }
+        });
+    });
+});
+</script>
 @endsection
 @endsection

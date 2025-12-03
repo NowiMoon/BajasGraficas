@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Alumno;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\JsonResponse;
 
 class DashboardController extends Controller
 {
@@ -61,5 +66,62 @@ class DashboardController extends Controller
         }
         
         return view('dashboard', compact('alumnos'));
+    }
+
+    public function destroy($id): RedirectResponse
+    {
+        $alumno = Alumno::where('Id_Registro', $id)->first();
+        if (! $alumno) {
+            return redirect()->back()->with('error', 'Registro no encontrado.');
+        }
+
+        $alumno->delete();
+
+        return redirect()->route('dashboard')->with('success', 'Registro eliminado correctamente.');
+    }
+
+    /**
+     * Elimina todos los registros de la tabla alumnos.
+     */
+    public function destroyAll(Request $request): RedirectResponse
+    {
+        // protección extra en el controlador (middleware ya debe validar)
+        if (!Auth::check() || Auth::user()->user_type !== 1) {
+            return redirect()->back()->with('error', 'No autorizado.');
+        }
+
+        try {
+            DB::transaction(function () {
+                // Usar delete() para respetar eventos Eloquent; si quieres truncate, usar DB::table('alumnos')->truncate();
+                Alumno::query()->delete();
+            });
+
+            return redirect()->route('dashboard')->with('success', 'Todos los alumnos han sido eliminados.');
+        } catch (\Throwable $e) {
+            \Log::error('Error eliminando todos los alumnos: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Ocurrió un error al eliminar los registros.');
+        }
+    }
+
+    /**
+     * Valida la contraseña del usuario autenticado (AJAX).
+     */
+    public function validateAdminPassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string'],
+        ]);
+
+        $user = Auth::user();
+        if (! $user || $user->user_type !== 1) {
+            return response()->json(['valid' => false, 'message' => 'No autorizado.'], 403);
+        }
+
+        $password = $request->input('password', '');
+        if (! Hash::check($password, $user->password)) {
+            return response()->json(['valid' => false, 'message' => 'Contraseña administrativa incorrecta.'], 200);
+        }
+
+        return response()->json(['valid' => true], 200);
     }
 }
