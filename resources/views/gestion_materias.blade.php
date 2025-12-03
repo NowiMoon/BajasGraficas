@@ -72,7 +72,7 @@
                 <div class="d-flex align-items-center py-2">
                     <img src="{{ asset('images/document_search.png') }}" alt="" style="height: 80px">
                     <div class="d-flex flex-column">
-                        <label for="file" class="fs-4">Selecciona un archivo  sdfsds .csv:</label>
+                        <label for="file" class="fs-4">Selecciona un archivo .csv:</label>
                         <input type="file" id="file" name="file" accept=".csv" required class="fs-4">
                     </div>
                 </div>

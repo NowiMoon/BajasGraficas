@@ -97,7 +97,7 @@
         </div>
 
         <!-- Módulo: Usuarios existentes -->
-        <div class="col-md-8 mb-4">
+        <div class="col-md-8 mb-4 mt-4">
             <div class="card">
                 <div class="card-header" style="background-color: #004A98; color:white">Usuarios existentes</div>
                 <div class="card-body">
@@ -153,85 +153,99 @@
             </div>
         </div>
 
+        {{-- Botón: Eliminar todos los alumnos (solo Administrador) --}}
+        @if(Auth::check() && Auth::user()->user_type === 1)
+        <div class="col-md-8 mb-4 mt-4">
+            <div class="card">
+                <div class="card-header" style="background-color: #004A98; color:white">Eliminar todos los alumnos</div>
+                <div class="card-body">
+                    <form method="POST" action="{{ route('alumnos.destroyAll') }}" class="delete-all-form d-inline">
+                        @csrf
+                        {{-- campo oculto para enviar la contraseña del admin --}}
+                        <input type="hidden" name="admin_password" id="admin_password" value="">
+                        <button type="submit" class="btn btn-danger" id="btn-delete-all">
+                            Eliminar todos los alumnos
+                        </button>
+                    </form>
+                    <p class="mt-2 text-muted small">Esta acción eliminará todos los registros de alumnos y no se puede deshacer.</p>
+                </div>
+            </div>
+        </div>
+        @endif
+
     </div>
 </div>
 @endsection
 @section('scripts')
-    @if(session('success'))
+    @parent
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        Swal.fire({
-            icon: 'success',
-            title: '¡Éxito!',
-            text: '{{ session('success') }}',
-            confirmButtonText: 'Aceptar'
-        });
-    </script>
-@endif
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.delete-all-form').forEach(function(form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
 
-@if(session('error'))
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: '{{ session('error') }}',
-            confirmButtonText: 'Aceptar'
-        });
-    </script>
-@endif
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const resetModalEl = document.getElementById('resetPasswordModal');
-    const resetForm = document.getElementById('resetPasswordForm');
-    const resetUserName = document.getElementById('resetUserName');
-    const newPass = document.getElementById('new_password');
-    const newPassConf = document.getElementById('new_password_confirmation');
-    const errorBox = document.getElementById('reset-pass-error');
+                if (typeof Swal === 'undefined') {
+                    if (confirm('¿Eliminar todos los alumnos? Esta acción no se puede deshacer.')) {
+                        form.submit();
+                    }
+                    return;
+                }
 
-    let bsResetModal = null;
-    if (resetModalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        bsResetModal = new bootstrap.Modal(resetModalEl);
-    }
+                Swal.fire({
+                    title: 'Confirmación administrativa',
+                    text: 'Para continuar, ingresa tu contraseña de administrador.',
+                    input: 'password',
+                    inputAttributes: {
+                        autocapitalize: 'off',
+                        autocorrect: 'off'
+                    },
+                    inputPlaceholder: 'Contraseña del administrador',
+                    showCancelButton: true,
+                    confirmButtonText: 'Confirmar y eliminar',
+                    cancelButtonText: 'Cancelar',
+                    preConfirm: (password) => {
+                        if (!password) {
+                            Swal.showValidationMessage('La contraseña es obligatoria');
+                            return false;
+                        }
 
-    document.querySelectorAll('.btn-open-reset').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const url = this.dataset.url;
-            const name = this.dataset.name || '';
-            if (!resetForm) return;
-            resetForm.action = url;
-            if (resetUserName) resetUserName.value = name;
-            if (newPass) newPass.value = '';
-            if (newPassConf) newPassConf.value = '';
-            if (errorBox) errorBox.style.display = 'none';
-
-            if (bsResetModal) {
-                bsResetModal.show();
-            } else if (typeof $ !== 'undefined' && $(resetModalEl).modal) {
-                $(resetModalEl).modal('show');
-            }
+                        // Llamada AJAX a la ruta que valida la contraseña
+                        return fetch("{{ route('admin.validate_password') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ password: password })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data || data.valid !== true) {
+                                const msg = (data && data.message) ? data.message : 'Contraseña incorrecta';
+                                Swal.showValidationMessage(msg);
+                                return false;
+                            }
+                            return password;
+                        })
+                        .catch(() => {
+                            Swal.showValidationMessage('Error validando la contraseña');
+                            return false;
+                        });
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed && result.value) {
+                        // password validado; enviar formulario (oculto ya contiene admin_password)
+                        const hidden = document.getElementById('admin_password');
+                        if (hidden) hidden.value = result.value;
+                        form.submit();
+                    }
+                });
+            });
         });
     });
-
-    if (resetForm) {
-        resetForm.addEventListener('submit', function (e) {
-            if (newPass && newPassConf && newPass.value !== newPassConf.value) {
-                e.preventDefault();
-                if (errorBox) {
-                    errorBox.textContent = 'Las contraseñas no coinciden.';
-                    errorBox.style.display = 'block';
-                }
-                return false;
-            }
-            const btn = resetForm.querySelector('button[type="submit"]');
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = 'Procesando...';
-            }
-        });
-    }
-});
-</script>
+    </script>
 @endsection
 
 <!-- Modal para restablecer contraseña -->

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use App\Models\Alumno;
 use App\Models\Materia;
+use Illuminate\Support\Facades\Log;
 
 class PrepararDatosController extends Controller
 {
@@ -80,7 +81,7 @@ class PrepararDatosController extends Controller
 
         //registro por registro insertamos en la bd
         //sin duplicados, ya con la materia, escuela y trabajo normalizado
-        for ($i = 0; $i < $count; $i++) 
+        /*for ($i = 0; $i < $count; $i++) 
         {
             $datos = [
                 'Anio' => $lista_anio[$i],
@@ -103,7 +104,67 @@ class PrepararDatosController extends Controller
             ];
 
             DB::table('alumnos')->insert($datos);
-        }
+        }*/
+        $insertados = 0;
+$errores = [];
+
+for ($i = 0; $i < $count; $i++) 
+{
+    try {
+        $datos = [
+            'Anio' => $lista_anio[$i],
+            'Id_Reg_A' => $reg_anio[$i],
+            'Cv_Alumno' => $clave[$i],
+            'Nombre_Alumno' => $nombre[$i],
+            'Gen' => $resultado[$i],
+            'Carrera' => $carrera[$i],
+            'email' => $email[$i],
+            'Mat_1' => $mat1[$i],
+            'Mat_2' => $mat2[$i],
+            'Mat_3' => $mat3[$i],
+            'Escuela' => $escuela[$i],
+            'TBaja' => $baja[$i],
+            'Inc_Carr' => $inconveniente[$i],
+            'Empresa' => $empresa[$i],
+            'Titulacion' => $titulacion[$i],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        DB::table('alumnos')->insert($datos);
+        $insertados++;
+        
+        Log::info("✓ Insertado registro $i: " . $nombre[$i]);
+        
+    } catch (\Exception $e) {
+        $errores[$i] = [
+            'error' => $e->getMessage(),
+            'datos' => $datos,
+            'indice' => $i
+        ];
+        
+        Log::error("✗ ERROR en registro $i: " . $e->getMessage());
+        Log::error("Datos del registro $i: " . json_encode($datos));
+        
+        // Continuar con los siguientes registros
+        continue;
+    }
+}
+
+// Resumen
+Log::info("=== RESUMEN DE INSERCIÓN ===");
+Log::info("Total registros a insertar: $count");
+Log::info("Registros insertados exitosamente: $insertados");
+Log::info("Errores: " . count($errores));
+
+if (!empty($errores)) {
+    Log::error("Registros con errores:", $errores);
+    
+    // Mostrar el primer error para diagnóstico
+    $primerError = reset($errores);
+    Log::error("Primer error en índice: " . $primerError['indice']);
+    Log::error("Mensaje error: " . $primerError['error']);
+}
 
 
         return response()->json(['mensaje' => $count . ' registros guardados correctamente']);

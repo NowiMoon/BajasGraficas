@@ -29,7 +29,7 @@ class ExcelController extends Controller
         'Escuela de Procedencia',
         'Empresa Laboral',
         'Inconveniente',
-        'Tesis'  // Nueva columna en lugar de las vacías
+        'Tesis' 
     ];
     
     private $expectedColumns17 = [
@@ -104,17 +104,30 @@ class ExcelController extends Controller
             }
         }
 
-        // Obtener las columnas de la segunda fila (para validación en formato viejo)
-        $rows = [];
-        foreach ($sheet->getRowIterator(2,2) as $row) { // Comienza desde la segunda fila (datos)
-            foreach ($row->getCellIterator() as $cell) {
-                $rows[] = trim($cell->getValue()); 
-            }
-        }
-    
         // Contar el número de columnas
         $columnCount = count($headers);
-        //dd($columnCount);
+        Log::info($columnCount);
+        // Obtener las columnas de la segunda fila (para validación en formato viejo)
+        $rows = [];
+        $primerValor = $sheet->getCell('A1')->getValue();
+        $Nombre_header = "Relación de Alumnos que han solicitado carta de no adeudo a los Laboratorio UDICEI";
+        $indice_aux = 1;
+
+        if($columnCount == 17)
+        {
+            if($primerValor == $Nombre_header)
+            {
+                $indice_aux = 2;
+                Log::info("tiene header");
+            }
+            foreach ($sheet->getRowIterator($indice_aux,$indice_aux) as $row) { // Comienza desde la segunda fila (datos)
+                foreach ($row->getCellIterator() as $cell) {
+                    $rows[] = trim($cell->getValue()); 
+                }
+            }
+            Log::info($indice_aux);
+        }
+        
 
         if($columnCount != 16 && $columnCount != 17 && $columnCount != 20)
         {
@@ -172,21 +185,21 @@ class ExcelController extends Controller
             $c_mat2 = array_column($data, 11);
             $c_mat3 = 0;
 
-            for ($i = 0; $i < 2; $i++) {
-                array_shift($c_clave);
-                array_shift($c_nombre);
-                array_shift($c_generacion);
-                array_shift($c_carrera);
-                array_shift($c_email);
-                array_shift($c_materias);
-                array_shift($c_escuelas);
-                array_shift($c_baja);
-                array_shift($c_inconveniente);
-                array_shift($c_trabajos);
-                array_shift($c_titulacion);
-                array_shift($c_mat2);
-            }
- 
+                for ($i = 0; $i < $indice_aux; $i++) {
+                    array_shift($c_clave);
+                    array_shift($c_nombre);
+                    array_shift($c_generacion);
+                    array_shift($c_carrera);
+                    array_shift($c_email);
+                    array_shift($c_materias);
+                    array_shift($c_escuelas);
+                    array_shift($c_baja);
+                    array_shift($c_inconveniente);
+                    array_shift($c_trabajos);
+                    array_shift($c_titulacion);
+                    array_shift($c_mat2);
+                }
+             Log::info($c_nombre);
         }
         elseif ($columnCount === 20) {
             $c_clave = array_column($data, 6);
@@ -257,7 +270,7 @@ class ExcelController extends Controller
 
         $baja_minusculas = array_map('strtolower', $c_baja);
 
-        $c_id_anio = $this->ObtenFecha($fechas,$columnCount,$c_generacion);
+        $c_id_anio = $this->ObtenFecha($fechas,$columnCount,$c_generacion,$indice_aux);
 
         $DATOS[] = $c_id_anio;
         $DATOS[] = $claves_nuevas;
@@ -486,15 +499,24 @@ class ExcelController extends Controller
 
     //----------------------------------------------------------------------------------------------------------------
 
-    private function ObtenFecha($fechas,$columnCount,$c_generacion)
+    private function ObtenFecha($fechas,$columnCount,$c_generacion,$indice_aux)
     {
         $col_fecha = [];
         $count = 1;
+        Log::info(count($fechas));
 
         if($columnCount == 16 || $columnCount == 17)
         {
-            array_shift($fechas);
-            array_shift($fechas); 
+            if($indice_aux == 2)
+            {
+                array_shift($fechas);
+                array_shift($fechas); 
+            }
+            else
+            {
+                array_shift($fechas); 
+            }
+
         } 
         if($columnCount == 20)
         {

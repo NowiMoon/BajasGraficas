@@ -100,7 +100,15 @@ class RecibirJsonController extends Controller
             //las usaremos para trabajar en la api
 
             $materias_bd = Materia::pluck('nombre_materia')->toArray();
-            Log::info($materias_bd);
+            $trabajos_bd = Alumno::whereNotNull('Empresa')
+                     ->distinct()
+                     ->pluck('Empresa')
+                     ->toArray();
+            $escuelas_bd = Alumno::whereNotNull('Escuela')
+                     ->distinct()
+                     ->pluck('Escuela')
+                     ->toArray();
+            //Log::info($materias_bd);
             //obtenemos una lista de las materias existentes en la bd
             //la api usará esta informacion como base
 

@@ -16,7 +16,7 @@ use App\Http\Controllers\BotonesController;
 Route::get('/', function () {
     if (Auth::check()) {
         if (Auth::User()->hasRole('admin')) {
-            return redirect()->route('register');
+            return redirect()->route('dashboard');
         } elseif (Auth::User()->hasRole('coordinador')) {
             return redirect()->route('dashboard');
         } elseif (Auth::User()->hasRole('trabajador')) {
@@ -28,9 +28,10 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
     // si es admin (user_type === 1) redirige a register
+    /*
     if (Auth::check() && Auth::user()->user_type === 1) {
         return redirect()->route('register');
-    }
+    }*/
 
     // pasar el Request al controlador
     return app(\App\Http\Controllers\DashboardController::class)->index($request);
@@ -47,6 +48,9 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     // Rutas de administrador aquí
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::delete('/alumnos/{id}', [DashboardController::class, 'destroy'])->name('alumnos.destroy');
+    Route::post('/alumnos/destroy-all', [DashboardController::class, 'destroyAll'])->name('alumnos.destroyAll');
+    Route::post('/admin/validate-password', [DashboardController::class, 'validateAdminPassword'])->name('admin.validate_password');
 });
 
 Route::patch('/users/{user}/toggle', [RegisteredUserController::class, 'toggle'])
@@ -89,5 +93,6 @@ Route::get('/api/materias', [BotonesController::class, 'materias']);
 Route::get('/api/trabajos', [BotonesController::class, 'trabajos']);
 Route::get('/api/escuelas', [BotonesController::class, 'escuelas']);
 Route::get('/api/generaciones', [BotonesController::class, 'generation']);
+Route::get('/api/suggestions', [DashboardController::class, 'getSuggestions'])->name('suggestions');
 //Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 require __DIR__.'/auth.php';
