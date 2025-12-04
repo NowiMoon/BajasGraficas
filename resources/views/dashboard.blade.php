@@ -1083,6 +1083,10 @@ $('#generarGraficaBtn').on('click', function() {
         return colores;
     }
 
+    
+
+    
+
     // Variables JS renderizadas por Blade (usadas por la función JS)
     const isAdmin = {{ Auth::check() && Auth::user()->user_type === 1 ? 'true' : 'false' }};
     const deleteUrlTemplate = "{{ route('alumnos.destroy', ['id' => 'ID_PLACEHOLDER']) }}";
@@ -1440,6 +1444,88 @@ document.addEventListener('DOMContentLoaded', function () {
                 form.submit();
             }
         });
+    });
+});
+
+    $('#btnDownloadPDF').on('click', function () {
+    // Obtener el canvas y la imagen base64
+    let canvas = document.getElementById('dataChart');
+    let base64Image = canvas.toDataURL('image/png');
+
+    // Verificar si hay datos en el gráfico (asumiendo que usas Chart.js)
+    const chartInstance = Chart.getChart(canvas);
+    if (!chartInstance || chartInstance.data.datasets.every(dataset => dataset.data.length === 0)) {
+        Swal.fire({
+            title: 'Error',
+            text: 'No hay datos en el gráfico para generar el PDF.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
+        return;
+    }
+
+    // Mostrar mensaje de "Generando reporte" después de verificar que hay datos
+    Swal.fire({
+        title: 'Generando reporte',
+        text: 'Se está generando su reporte, por favor espere...',
+        icon: 'info',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch("{{ route('downloadPDF') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+        body: JSON.stringify({
+            Datos: window.datosGrafica,
+            Total: window.totalGrafica,
+            nombreGrafica: Nombre_de_la_grafica,
+            fecha: new Date().toLocaleDateString('es-MX'),  // "15/01/2024"
+            hora: new Date().toLocaleTimeString('es-MX'),   // "14:30:25"
+            imagenGrafica: base64Image,
+        }),
+    })
+    .then(response => {
+        if (!response.ok) return response.json().then(err => { throw new Error(err.detalle || 'Error al generar el PDF'); });
+        return response.blob();
+    })
+    .then(blob => {
+
+        // Cerrar el mensaje de "Generando reporte"
+        Swal.close();
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "reporte.pdf";
+        a.click();
+        window.URL.revokeObjectURL(url);
+
+        // Notificación de éxito
+        Swal.fire({
+            title: '¡PDF descargado!',
+            text: 'El reporte se descargó correctamente.',
+            icon: 'success',
+            confirmButtonText: 'Aceptar'
+        });
+    })
+    .catch(error => {
+        // Notificación de error
+        // Cerrar el mensaje de "Generando reporte"
+        Swal.close();
+
+        Swal.fire({
+            title: 'Error',
+            text: error.message || 'No se pudo generar el archivo PDF',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
+        console.error('Error:', error);
     });
 });
 </script>
