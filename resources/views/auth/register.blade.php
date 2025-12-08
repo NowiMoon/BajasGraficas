@@ -244,6 +244,43 @@
                 });
             });
         });
+
+        // Manejo del modal de restablecer contraseña (botón "Restablecer")
+        const resetModalEl = document.getElementById('resetPasswordModal');
+        const resetForm = document.getElementById('resetPasswordForm');
+        const resetUserName = document.getElementById('resetUserName');
+        const newPassword = document.getElementById('new_password');
+        const newPasswordConfirmation = document.getElementById('new_password_confirmation');
+        const resetPassError = document.getElementById('reset-pass-error');
+
+        if (resetModalEl && resetForm && resetUserName) {
+            const resetModal = new bootstrap.Modal(resetModalEl);
+
+            document.querySelectorAll('.btn-open-reset').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    // Asignar action dinámico y nombre del usuario al modal
+                    resetForm.action = btn.dataset.url;
+                    resetUserName.value = btn.dataset.name || '';
+                    newPassword.value = '';
+                    newPasswordConfirmation.value = '';
+                    resetPassError.style.display = 'none';
+                    resetPassError.textContent = '';
+                    resetModal.show();
+                });
+            });
+
+            resetForm.addEventListener('submit', function (e) {
+                // Validación rápida en el cliente para evitar envíos inválidos
+                if (newPassword.value !== newPasswordConfirmation.value) {
+                    e.preventDefault();
+                    resetPassError.textContent = 'Las contraseñas no coinciden.';
+                    resetPassError.style.display = 'block';
+                    return;
+                }
+                resetPassError.style.display = 'none';
+                resetPassError.textContent = '';
+            });
+        }
     });
     </script>
 @endsection

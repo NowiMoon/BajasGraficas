@@ -131,7 +131,7 @@
                                         <div class="mb-2">
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input filtro-unico" type="radio" name="temaGrafica" id="trabajoCheckbox" value="trabajo" style="transform: scale(1.2); border: 2px solid #004A98;">
-                                                <label class="form-check-label fw-semibold small ms-2" for="trabajoCheckbox" style="color: #2c3e50;">Lugar donde labura</label>
+                                                <label class="form-check-label fw-semibold small ms-2" for="trabajoCheckbox" style="color: #2c3e50;">Lugar donde labora</label>
                                             </div>
                                         </div>
                                     </div>
@@ -146,9 +146,10 @@
                                             <label for="baja" class="form-label small fw-semibold mb-1">Tipos de baja existentes</label>
                                             <select class="form-select form-select-sm" id="baja">
                                                 <option value="todas">Todas</option>
+                                                <!--<option value="todas">Cambio de carrera</option>
                                                 <option value="Trámite de Pasantía">Trámite de Pasantía</option>
                                                 <option value="Baja Temporal o Definitiva">Baja Temporal o Definitiva</option>
-                                                <option value="Cambio de Carrera">Cambio de Carrera</option>
+                                                <option value="Cambio de Carrera">Cambio de Carrera</option>-->
                                             </select>
                                         </div>
 
@@ -156,9 +157,9 @@
                                             <label for="Carrera" class="form-label small fw-semibold mb-1">Carreras del área</label>
                                             <select class="form-select form-select-sm" id="Carrera">
                                                 <option value="todas">Todas</option>
-                                                <option value="Ingeniero en Computación">Ingeniería en Computación</option>
-                                                <option value="Ingeniero en Sistemas Inteligentes">Ingeniería en Sistemas Inteligentes</option>
-                                                <option value="Ingeniero en Informática">Ingeniería en Informática</option>
+                                                <option value="Ingeniería en Computación">Ingeniería en Computación</option>
+                                                <option value="Ingeniería en Sistemas Inteligentes">Ingeniería en Sistemas Inteligentes</option>
+                                                <option value="Ingeniería en Informática">Ingeniería en Informática</option>
                                             </select>
                                         </div>
 
@@ -588,6 +589,21 @@ $(document).ready(function() {
         });
     });
 
+    $('#baja').on('focus', function () {
+        $.ajax({
+            url: '/api/tipos',
+            type: 'GET',
+            success: function (data) {
+                const select = $('#baja');
+                select.find('option:not([value="todas"])').remove();
+ 
+                data.forEach(function (tipo) {
+                    select.append('<option value="' + tipo + '">' + tipo + '</option>');
+                });
+           }
+        });
+    });
+
     $.ajax({
         url: '/api/generaciones',
         type: 'GET',
@@ -749,6 +765,12 @@ $('#generarGraficaBtn').on('click', function() {
     Nombre_de_la_grafica = nombreBase;
     window.titulo = nombreBase;
     window.subtitulo = descripcionCompleta;
+    // Eliminar filtros vacíos para no enviar cadenas vacías al servidor
+    Object.keys(filtros).forEach(function(key) {
+        if (filtros[key] === '' || filtros[key] === null || filtros[key] === undefined) {
+            delete filtros[key];
+        }
+    });
 
     $.ajax({
         url: "{{ route('get.data') }}",
@@ -1083,6 +1105,10 @@ $('#generarGraficaBtn').on('click', function() {
         return colores;
     }
 
+    
+
+    
+
     // Variables JS renderizadas por Blade (usadas por la función JS)
     const isAdmin = {{ Auth::check() && Auth::user()->user_type === 1 ? 'true' : 'false' }};
     const deleteUrlTemplate = "{{ route('alumnos.destroy', ['id' => 'ID_PLACEHOLDER']) }}";
@@ -1228,7 +1254,7 @@ $('#generarGraficaBtn').on('click', function() {
 
                     //banner de regreso de la API 
                       // Construir tabla de resultados
-                    resultadosHTML = `
+                    let resultadosHTML = `
                         <div class="mt-4">
                             <h5>Sugerencias encontradas:</h5>
                             <div class="table-responsive">
@@ -1441,6 +1467,101 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+});
+
+    $('#btnDownloadPDF').on('click', function () {
+    // Obtener el canvas y la imagen base64
+    let canvas = document.getElementById('dataChart');
+    let base64Image = canvas.toDataURL('image/png');
+
+    // Verificar si hay datos en el gráfico (asumiendo que usas Chart.js)
+    const chartInstance = Chart.getChart(canvas);
+    if (!chartInstance || chartInstance.data.datasets.every(dataset => dataset.data.length === 0)) {
+        Swal.fire({
+            title: 'Error',
+            text: 'No hay datos en el gráfico para generar el PDF.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
+        return;
+    }
+
+    
+
+    // Mostrar mensaje de "Generando reporte" después de verificar que hay datos
+    Swal.fire({
+        title: 'Generando reporte',
+        text: 'Se está generando su reporte, por favor espere...',
+        icon: 'info',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch("{{ route('downloadPDF') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        },
+        body: JSON.stringify({
+            Datos: window.datosGrafica,
+            Total: window.totalGrafica,
+            nombreGrafica: Nombre_de_la_grafica,
+            fecha: new Date().toLocaleDateString('es-MX'),  // "15/01/2024"
+            hora: new Date().toLocaleTimeString('es-MX'),   // "14:30:25"
+            imagenGrafica: base64Image,
+        }),
+    })
+    .then(response => {
+        if (!response.ok) return response.json().then(err => { throw new Error(err.detalle || 'Error al generar el PDF'); });
+        return response.blob();
+    })
+    .then(blob => {
+
+        // Cerrar el mensaje de "Generando reporte"
+        Swal.close();
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "reporte.pdf";
+        a.click();
+        window.URL.revokeObjectURL(url);
+
+        // Notificación de éxito
+        Swal.fire({
+            title: '¡PDF descargado!',
+            text: 'El reporte se descargó correctamente.',
+            icon: 'success',
+            confirmButtonText: 'Aceptar'
+        });
+    })
+    .catch(error => {
+        // Notificación de error
+        // Cerrar el mensaje de "Generando reporte"
+        Swal.close();
+
+        Swal.fire({
+            title: 'Error',
+            text: error.message || 'No se pudo generar el archivo PDF',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
+        console.error('Error:', error);
+    });
+});
+
+
+$('#limpiarFiltrosBtn').on('click', function() {
+    // Limpiar todos los filtros
+    $('.filtro-unico').prop('checked', false).prop('disabled', false);
+    $('#baja, #Carrera, #escuela, #materia, #trabajo, #tipo_titulacion').val('todas');
+    $('#anio_1, #anio_2').val('');
+    
+    // Recargar la tabla con todos los datos
+    location.reload();
 });
 </script>
 @endsection

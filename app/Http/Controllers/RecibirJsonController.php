@@ -100,6 +100,9 @@ class RecibirJsonController extends Controller
             //las usaremos para trabajar en la api
 
             $materias_bd = Materia::pluck('nombre_materia')->toArray();
+            Log::info($materias_bd);
+            //obtenemos una lista de las materias existentes en la bd
+            //obtenemos también las escuelas y trabajos desde la tabla alumnos
             $trabajos_bd = Alumno::whereNotNull('Empresa')
                      ->distinct()
                      ->pluck('Empresa')
@@ -108,8 +111,6 @@ class RecibirJsonController extends Controller
                      ->distinct()
                      ->pluck('Escuela')
                      ->toArray();
-            //Log::info($materias_bd);
-            //obtenemos una lista de las materias existentes en la bd
             //la api usará esta informacion como base
 
             for($tipo = 1; $tipo < 4; $tipo++) {
@@ -119,16 +120,18 @@ class RecibirJsonController extends Controller
                 switch($tipo) {
                     case 1:
                         $datosRequest['datos'] = $entradas_Materias;
-                        $datosRequest['tipo'] = $tipo; 
-                        $datosRequest['mat_bd'] = $materias_bd;
+                        $datosRequest['tipo'] = $tipo;
+                        $datosRequest['opciones_bd'] = $materias_bd;
                         break;
                     case 2:
                         $datosRequest['datos'] = $entradas_Escuelas;
                         $datosRequest['tipo'] = $tipo;
+                        $datosRequest['opciones_bd'] = $escuelas_bd;
                         break;
                     case 3:
                         $datosRequest['datos'] = $entradas_Trabajos;
                         $datosRequest['tipo'] = $tipo;
+                        $datosRequest['opciones_bd'] = $trabajos_bd;
                         break;
                 }
 

@@ -31,217 +31,287 @@ class GraficoController extends Controller
 
         switch ($tipoFiltro){
             case 'baja':
-                if($baja === 'todas')
-                {
-                    $registros = Alumno::query();
-                }
-                else
-                {
-                    $registros = Alumno::query()
-                        ->where('TBaja', $baja);
+                $registros = Alumno::query();
+                if (!empty($baja) && $baja !== 'todas') {
+                    $bajaTrim = mb_strtolower(trim($baja));
+                    if (mb_strpos($bajaTrim, 'cambio de carrera') === 0) {
+                        $registros->whereRaw('LOWER(TBaja) LIKE ?', [$bajaTrim . '%']);
+                    } else {
+                        $registros->where('TBaja', $baja);
+                    }
                 }
 
-                if($generacionDesde !== null && $generacionHasta !== null)
-                {
-                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);}
-                if ($materia !== 'todas') {
-                    $registros->where('Mat_1', $materia);}
-                if ($escuela !== 'todas') {
-                    $registros->where('Escuela', $escuela);}
-                if ($carrera !== 'todas') {
-                    $registros->where('Carrera', $carrera);}
-                if ($tipoTitulacion !== 'todas') {
-                    $registros->where('Titulacion', $tipoTitulacion);}
-                if ($trabajo !== 'todas') {
-                    $registros->where('Empresa', $trabajo);}
+                if (!empty($generacionDesde) && !empty($generacionHasta)) {
+                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);
+                }
+                if (!empty($materia) && $materia !== 'todas') {
+                    $registros->where(function($q) use ($materia) {
+                        $q->where('Mat_1', $materia)
+                          ->orWhere('Mat_2', $materia)
+                          ->orWhere('Mat_3', $materia);
+                    });
+                }
+                if (!empty($escuela) && $escuela !== 'todas') {
+                    $registros->where('Escuela', $escuela);
+                }
+                if (!empty($carrera) && $carrera !== 'todas') {
+                    $registros->where('Carrera', $carrera);
+                }
+                if (!empty($tipoTitulacion) && $tipoTitulacion !== 'todas') {
+                    $registros->where('Titulacion', $tipoTitulacion);
+                }
+                if (!empty($trabajo) && $trabajo !== 'todas') {
+                    $registros->where('Empresa', $trabajo);
+                }
                 
-                $valoresBaja = $registros->pluck('TBaja')->all(); // Convertir a array
-                $valoresBaja = array_filter($valoresBaja); // Elimina null, false, '', 0, etc.
+                $valores = $registros->pluck('TBaja')->all();
+                $valores = array_filter($valores);
 
-                $data = array_count_values($valoresBaja);
-                $total = count($valoresBaja);
+                $data = array_count_values($valores);
+                $total = count($valores);
                 break;
             case 'trabajo':
-                if($trabajo === 'todas')
-                {
+                if (empty($trabajo) || $trabajo === 'todas') {
                     $registros = Alumno::query();
-                }
-                else
-                {
-                    $registros = Alumno::query()
-                        ->where('Empresa', $trabajo);
+                } else {
+                    $registros = Alumno::query()->where('Empresa', $trabajo);
                 }
 
-                if($generacionDesde !== null && $generacionHasta !== null)
-                {
-                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);}
-                if ($materia !== 'todas') {
-                    $registros->where('Mat_1', $materia);}
-                if ($escuela !== 'todas') {
-                    $registros->where('Escuela', $escuela);}
-                if ($carrera !== 'todas') {
-                    $registros->where('Carrera', $carrera);}
-                if ($tipoTitulacion !== 'todas') {
-                    $registros->where('Titulacion', $tipoTitulacion);}
-                if ($baja !== 'todas') {
-                    $registros->where('Tbaja', $baja);}
+                if (!empty($generacionDesde) && !empty($generacionHasta)) {
+                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);
+                }
+                if (!empty($materia) && $materia !== 'todas') {
+                    $registros->where(function($q) use ($materia) {
+                        $q->where('Mat_1', $materia)
+                          ->orWhere('Mat_2', $materia)
+                          ->orWhere('Mat_3', $materia);
+                    });
+                }
+                if (!empty($escuela) && $escuela !== 'todas') {
+                    $registros->where('Escuela', $escuela);
+                }
+                if (!empty($carrera) && $carrera !== 'todas') {
+                    $registros->where('Carrera', $carrera);
+                }
+                if (!empty($tipoTitulacion) && $tipoTitulacion !== 'todas') {
+                    $registros->where('Titulacion', $tipoTitulacion);
+                }
+                if (!empty($baja) && $baja !== 'todas') {
+                    $bajaTrim = mb_strtolower(trim($baja));
+                    if (mb_strpos($bajaTrim, 'cambio de carrera') === 0) {
+                        $registros->whereRaw('LOWER(TBaja) LIKE ?', [$bajaTrim . '%']);
+                    } else {
+                        $registros->where('TBaja', $baja);
+                    }
+                }
                 
-                $valoresBaja = $registros->pluck('Empresa')->all(); // Convertir a array
-                $valoresBaja = array_filter($valoresBaja); // Elimina null, false, '', 0, etc.
+                $valores = $registros->pluck('Empresa')->all();
+                $valores = array_filter($valores);
 
-                $data = array_count_values($valoresBaja);
-                $total = count($valoresBaja);
+                $data = array_count_values($valores);
+                $total = count($valores);
                 break;
             case 'generacion':
                 $registros = Alumno::query();
                 
-                if($generacionDesde !== null && $generacionHasta !== null)
-                {
-                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);}
-                if ($materia !== 'todas') {
-                    $registros->where('Mat_1', $materia);}
-                if ($escuela !== 'todas') {
-                    $registros->where('Escuela', $escuela);}
-                if ($baja !== 'todas') {
-                    $registros->where('Tbaja', $baja);}
-                if ($tipoTitulacion !== 'todas') {
-                    $registros->where('Titulacion', $tipoTitulacion);}
-                if ($trabajo !== 'todas') {
-                    $registros->where('Empresa', $trabajo);}
-                if ($carrera !== 'todas') {
-                    $registros->where('Carrera', $carrera);}
+                if (!empty($generacionDesde) && !empty($generacionHasta)) {
+                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);
+                }
+                if (!empty($materia) && $materia !== 'todas') {
+                    $registros->where(function($q) use ($materia) {
+                        $q->where('Mat_1', $materia)
+                          ->orWhere('Mat_2', $materia)
+                          ->orWhere('Mat_3', $materia);
+                    });
+                }
+                if (!empty($escuela) && $escuela !== 'todas') {
+                    $registros->where('Escuela', $escuela);
+                }
+                if (!empty($baja) && $baja !== 'todas') {
+                    $bajaTrim = mb_strtolower(trim($baja));
+                    if (mb_strpos($bajaTrim, 'cambio de carrera') === 0) {
+                        $registros->whereRaw('LOWER(TBaja) LIKE ?', [$bajaTrim . '%']);
+                    } else {
+                        $registros->where('TBaja', $baja);
+                    }
+                }
+                if (!empty($tipoTitulacion) && $tipoTitulacion !== 'todas') {
+                    $registros->where('Titulacion', $tipoTitulacion);
+                }
+                if (!empty($trabajo) && $trabajo !== 'todas') {
+                    $registros->where('Empresa', $trabajo);
+                }
+                if (!empty($carrera) && $carrera !== 'todas') {
+                    $registros->where('Carrera', $carrera);
+                }
                 
-                $valoresBaja = $registros->pluck('Gen')->all(); // Convertir a array
-                $valoresBaja = array_filter($valoresBaja); // Elimina null, false, '', 0, etc.
+                $valores = $registros->pluck('Gen')->all();
+                $valores = array_filter($valores);
 
-                $data = array_count_values($valoresBaja);
-                $total = count($valoresBaja);
+                $data = array_count_values($valores);
+                $total = count($valores);
                 break;
             case 'carrera':
-                if($carrera === 'todas')
-                {
+                if (empty($carrera) || $carrera === 'todas') {
                     $registros = Alumno::query();
-                }
-                else
-                {
-                    $registros = Alumno::query()
-                        ->where('Carrera', $carrera);
+                } else {
+                    $registros = Alumno::query()->where('Carrera', $carrera);
                 }
 
-                if($generacionDesde !== null && $generacionHasta !== null)
-                {
-                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);}
-                if ($materia !== 'todas') {
-                    $registros->where('Mat_1', $materia);}
-                if ($escuela !== 'todas') {
-                    $registros->where('Escuela', $escuela);}
-                if ($baja !== 'todas') {
-                    $registros->where('Tbaja', $baja);}
-                if ($tipoTitulacion !== 'todas') {
-                    $registros->where('Titulacion', $tipoTitulacion);}
-                if ($trabajo !== 'todas') {
-                    $registros->where('Empresa', $trabajo);}
+                if (!empty($generacionDesde) && !empty($generacionHasta)) {
+                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);
+                }
+                if (!empty($materia) && $materia !== 'todas') {
+                    $registros->where(function($q) use ($materia) {
+                        $q->where('Mat_1', $materia)
+                          ->orWhere('Mat_2', $materia)
+                          ->orWhere('Mat_3', $materia);
+                    });
+                }
+                if (!empty($escuela) && $escuela !== 'todas') {
+                    $registros->where('Escuela', $escuela);
+                }
+                if (!empty($baja) && $baja !== 'todas') {
+                    $bajaTrim = mb_strtolower(trim($baja));
+                    if (mb_strpos($bajaTrim, 'cambio de carrera') === 0) {
+                        $registros->whereRaw('LOWER(TBaja) LIKE ?', [$bajaTrim . '%']);
+                    } else {
+                        $registros->where('TBaja', $baja);
+                    }
+                }
+                if (!empty($tipoTitulacion) && $tipoTitulacion !== 'todas') {
+                    $registros->where('Titulacion', $tipoTitulacion);
+                }
+                if (!empty($trabajo) && $trabajo !== 'todas') {
+                    $registros->where('Empresa', $trabajo);
+                }
                 
-                $valoresBaja = $registros->pluck('Carrera')->all(); // Convertir a array
-                $valoresBaja = array_filter($valoresBaja); // Elimina null, false, '', 0, etc.
+                $valores = $registros->pluck('Carrera')->all();
+                $valores = array_filter($valores);
 
-                $data = array_count_values($valoresBaja);
-                $total = count($valoresBaja);
+                $data = array_count_values($valores);
+                $total = count($valores);
                 break;
             case 'escuela':
-                if($escuela === 'todas')
-                {
+                if (empty($escuela) || $escuela === 'todas') {
                     $registros = Alumno::query();
-                }
-                else
-                {
-                    $registros = Alumno::query()
-                        ->where('Escuela', $escuela);
+                } else {
+                    $registros = Alumno::query()->where('Escuela', $escuela);
                 }
 
-                if($generacionDesde !== null && $generacionHasta !== null)
-                {
-                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);}
-                if ($materia !== 'todas') {
-                    $registros->where('Mat_1', $materia);}
-                if ($escuela !== 'todas') {
-                    $registros->where('Escuela', $escuela);}
-                if ($carrera !== 'todas') {
-                    $registros->where('Carrera', $carrera);}
-                if ($baja !== 'todas') {
-                    $registros->where('Tbaja', $baja);}
-                if ($tipoTitulacion !== 'todas') {
-                    $registros->where('Titulacion', $tipoTitulacion);}
-                if ($trabajo !== 'todas') {
-                    $registros->where('Empresa', $trabajo);}
+                if (!empty($generacionDesde) && !empty($generacionHasta)) {
+                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);
+                }
+                if (!empty($materia) && $materia !== 'todas') {
+                    $registros->where(function($q) use ($materia) {
+                        $q->where('Mat_1', $materia)
+                          ->orWhere('Mat_2', $materia)
+                          ->orWhere('Mat_3', $materia);
+                    });
+                }
+                if (!empty($escuela) && $escuela !== 'todas') {
+                    $registros->where('Escuela', $escuela);
+                }
+                if (!empty($baja) && $baja !== 'todas') {
+                    $bajaTrim = mb_strtolower(trim($baja));
+                    if (mb_strpos($bajaTrim, 'cambio de carrera') === 0) {
+                        $registros->whereRaw('LOWER(TBaja) LIKE ?', [$bajaTrim . '%']);
+                    } else {
+                        $registros->where('TBaja', $baja);
+                    }
+                }
+                if (!empty($tipoTitulacion) && $tipoTitulacion !== 'todas') {
+                    $registros->where('Titulacion', $tipoTitulacion);
+                }
+                if (!empty($trabajo) && $trabajo !== 'todas') {
+                    $registros->where('Empresa', $trabajo);
+                }
+                if (!empty($carrera) && $carrera !== 'todas') {
+                    $registros->where('Carrera', $carrera);
+                }
                 
-                $valoresBaja = $registros->pluck('Escuela')->all(); // Convertir a array
-                $valoresBaja = array_filter($valoresBaja); // Elimina null, false, '', 0, etc.
+                $valores = $registros->pluck('Escuela')->all();
+                $valores = array_filter($valores);
 
-                $data = array_count_values($valoresBaja);
-                $total = count($valoresBaja);
+                $data = array_count_values($valores);
+                $total = count($valores);
                 break;
             case 'materia':
-                if($materia === 'todas')
-                {
+                if (empty($materia) || $materia === 'todas') {
                     $registros = Alumno::query();
+                } else {
+                    $registros = Alumno::query()->where(function($q) use ($materia) {
+                        $q->where('Mat_1', $materia)
+                          ->orWhere('Mat_2', $materia)
+                          ->orWhere('Mat_3', $materia);
+                    });
                 }
-                else
-                {
-                    $registros = Alumno::query()
-                        ->where('Mat_1', $materia);
+                if (!empty($generacionDesde) && !empty($generacionHasta)) {
+                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);
+                }
+                if (!empty($baja) && $baja !== 'todas') {
+                    $bajaTrim = mb_strtolower(trim($baja));
+                    if (mb_strpos($bajaTrim, 'cambio de carrera') === 0) {
+                        $registros->whereRaw('LOWER(TBaja) LIKE ?', [$bajaTrim . '%']);
+                    } else {
+                        $registros->where('TBaja', $baja);
+                    }
+                }
+                if (!empty($escuela) && $escuela !== 'todas') {
+                    $registros->where('Escuela', $escuela);
+                }
+                if (!empty($carrera) && $carrera !== 'todas') {
+                    $registros->where('Carrera', $carrera);
+                }
+                if (!empty($tipoTitulacion) && $tipoTitulacion !== 'todas') {
+                    $registros->where('Titulacion', $tipoTitulacion);
+                }
+                if (!empty($trabajo) && $trabajo !== 'todas') {
+                    $registros->where('Empresa', $trabajo);
                 }
 
-                if($generacionDesde !== null && $generacionHasta !== null)
-                {
-                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);}
-                if ($baja !== 'todas') {
-                    $registros->where('Tbaja', $baja);}
-                if ($escuela !== 'todas') {
-                    $registros->where('Escuela', $escuela);}
-                if ($carrera !== 'todas') {
-                    $registros->where('Carrera', $carrera);}
-                if ($tipoTitulacion !== 'todas') {
-                    $registros->where('Titulacion', $tipoTitulacion);}
-                if ($trabajo !== 'todas') {
-                    $registros->where('Empresa', $trabajo);}
+                $valores = $registros->pluck('Mat_1')->all();
+                $valores = array_filter($valores);
 
-                $valoresBaja = $registros->pluck('Mat_1')->all(); // Convertir a array
-                $valoresBaja = array_filter($valoresBaja); // Elimina null, false, '', 0, etc.
-
-                $data = array_count_values($valoresBaja);
-                $total = count($valoresBaja);
+                $data = array_count_values($valores);
+                $total = count($valores);
                 break;
             case 'titulacion':
-                if($tipoTitulacion === 'todas')
-                {
+                if (empty($tipoTitulacion) || $tipoTitulacion === 'todas') {
                     $registros = Alumno::query();
-                }
-                else
-                {
-                    $registros = Alumno::query()
-                        ->where('Titulacion', $tipoTitulacion);
+                } else {
+                    $registros = Alumno::query()->where('Titulacion', $tipoTitulacion);
                 }
 
-                if($generacionDesde !== null && $generacionHasta !== null)
-                {
-                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);}
-                if ($baja !== 'todas') {
-                    $registros->where('Tbaja', $baja);}
-                if ($escuela !== 'todas') {
-                    $registros->where('Escuela', $escuela);}
-                if ($baja !== 'todas') {
-                    $registros->where('Carrera', $carrera);}
-                if ($baja !== 'todas') {
-                    $registros->where('Tbaja', $baja);}
-                if ($trabajo !== 'todas') {
-                    $registros->where('Empresa', $trabajo);}
+                if (!empty($generacionDesde) && !empty($generacionHasta)) {
+                    $registros->whereBetween('Gen', [$generacionDesde, $generacionHasta]);
+                }
+                if (!empty($baja) && $baja !== 'todas') {
+                    $bajaTrim = mb_strtolower(trim($baja));
+                    if (mb_strpos($bajaTrim, 'cambio de carrera') === 0) {
+                        $registros->whereRaw('LOWER(TBaja) LIKE ?', [$bajaTrim . '%']);
+                    } else {
+                        $registros->where('TBaja', $baja);
+                    }
+                }
+                if (!empty($escuela) && $escuela !== 'todas') {
+                    $registros->where('Escuela', $escuela);
+                }
+                if (!empty($carrera) && $carrera !== 'todas') {
+                    $registros->where('Carrera', $carrera);
+                }
+                if (!empty($tipoTitulacion) && $tipoTitulacion !== 'todas') {
+                    $registros->where('Titulacion', $tipoTitulacion);
+                }
+                if (!empty($trabajo) && $trabajo !== 'todas') {
+                    $registros->where('Empresa', $trabajo);
+                }
                 
-                $valoresBaja = $registros->pluck('Titulacion')->all(); // Convertir a array
-                $valoresBaja = array_filter($valoresBaja); // Elimina null, false, '', 0, etc.
+                $valores = $registros->pluck('Titulacion')->all();
+                $valores = array_filter($valores);
 
-                $data = array_count_values($valoresBaja);
-                $total = count($valoresBaja);
+                $data = array_count_values($valores);
+                $total = count($valores);
 
                 break;
             default:

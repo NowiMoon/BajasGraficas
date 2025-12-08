@@ -153,7 +153,7 @@ class ExcelController extends Controller
             $c_mat2 = array_column($data, 11);
             $c_mat3 = 0;
 
-            for ($i = 0; $i < 2; $i++) {
+            for ($i = 0; $i < 1; $i++) {
                 array_shift($c_clave);
                 array_shift($c_nombre);
                 array_shift($c_generacion);
@@ -267,6 +267,48 @@ class ExcelController extends Controller
             }
         }
         unset($valor);
+
+        foreach ($c_carrera as $idx => $valorCarrera) {
+            if ($valorCarrera === null) continue;
+            $v = mb_strtolower($valorCarrera);
+            if (mb_strpos($v, 'computación') !== false || mb_strpos($v, 'computacion') !== false) {
+                $c_carrera[$idx] = 'Ingeniería en Computación';
+            }
+            if (mb_strpos($v, 'informática') !== false || mb_strpos($v, 'informatica') !== false) {
+                $c_carrera[$idx] = 'Ingeniería en Informática';
+            }
+            if (mb_strpos($v, 'inteligentes') !== false || mb_strpos($v, 'sistemas') !== false) {
+                $c_carrera[$idx] = 'Ingeniería en Sistemas Inteligentes';
+            }
+        }
+
+        // Normalizar escuelas: poner "Ninguna" si está vacío o nulo
+        foreach ($c_escuelas as $idx => $valorEscuela) {
+            if ($valorEscuela === null || $valorEscuela === '') {
+                $c_escuelas[$idx] = 'Ninguna';
+            }
+        }
+
+        // Normalizar trabajos: poner "Ninguna" si está vacío o nulo
+        foreach ($c_trabajos as $idx => $valorTrabajo) {
+            if ($valorTrabajo === null || $valorTrabajo === '') {
+                $c_trabajos[$idx] = 'Ninguna';
+            }
+        }
+
+        // Normalizar materias: poner "Ninguna" si está vacío o nulo
+        foreach ($materias_truncadas as $idx => $valorMateria) {
+            if ($valorMateria === null || $valorMateria === '') {
+                $materias_truncadas[$idx] = 'Ninguna';
+            }
+        }
+
+        // Normalizar titulación: poner "Ninguna" si está vacío o nulo
+        foreach ($titulaciones as $idx => $valorTitulacion) {
+            if ($valorTitulacion === null || $valorTitulacion === '') {
+                $titulaciones[$idx] = 'Ninguna';
+            }
+        }
 
         $baja_minusculas = array_map('strtolower', $c_baja);
 
@@ -505,23 +547,13 @@ class ExcelController extends Controller
         $count = 1;
         Log::info(count($fechas));
 
-        if($columnCount == 16 || $columnCount == 17)
+        if($indice_aux == 2 )
         {
-            if($indice_aux == 2)
-            {
-                array_shift($fechas);
-                array_shift($fechas); 
-            }
-            else
-            {
-                array_shift($fechas); 
-            }
-
-        } 
-        if($columnCount == 20)
-        {
-            array_shift($fechas);
-        } 
+            array_shift($fechas);  // Eliminar una sola vez para columnCount 17
+        }
+        
+        array_shift($fechas);  // Eliminar una sola vez para otros (16, 20)
+        
         
         $col_fecha = array_map(function($fecha) {
             return date('Y', strtotime($fecha));
