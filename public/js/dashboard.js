@@ -140,7 +140,6 @@ $(document).ready(function() {
         e.preventDefault();
 
         $('#submitBtn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...');
-        //procesando ...
         $('#submitBtn').prop('disabled', true);
         $('#modalMessages').html('');
 
@@ -173,8 +172,7 @@ $(document).ready(function() {
                         </div>
                     `);
 
-                    //banner de regreso de la API 
-                      // Construir tabla de resultados
+                    // Construir tabla de resultados
                     let resultadosHTML = `
                         <div class="mt-4">
                             <h5>Sugerencias encontradas:</h5>
@@ -190,7 +188,6 @@ $(document).ready(function() {
                                     </thead>
                                     <tbody>`;
 
-                    // Contador único para IDs
                     let rowCounter = 0;
 
                     response.data.forEach(item => {
@@ -202,16 +199,25 @@ $(document).ready(function() {
                             if (res.opciones && res.opciones.length > 0) {
                                 sugerencias = '<div class="list-group">';
                                 res.opciones.forEach(opcion => {
+                                    let opcionEscapes = String(opcion).replace(/'/g, "\\'");
                                     sugerencias += `
                                         <button type="button" 
                                             class="list-group-item list-group-item-action" 
-                                            onclick="document.getElementById('mejor-coincidencia-${currentIndex}').value = '${opcion.replace(/'/g, "\\'")}'">
+                                            onclick="document.getElementById('mejor-coincidencia-${currentIndex}').value = '${opcionEscapes}'">
                                             ${opcion}
                                         </button>`;
                                 });
                                 sugerencias += '</div>';
                             } else {
                                 sugerencias = '<em>Sin sugerencias</em>';
+                            }
+
+                            // Opciones para el ListBox (Select) de Corrección Manual
+                            let opcionesSelect = '<option value="" disabled selected>Selecciona...</option><option value="Ninguna">Ninguna</option>';
+                            if (res.opciones && res.opciones.length > 0) {
+                                res.opciones.forEach(opt => {
+                                    opcionesSelect += `<option value="${opt}">${opt}</option>`;
+                                });
                             }
 
                             resultadosHTML += `
@@ -221,21 +227,13 @@ $(document).ready(function() {
                                         <input type="text" 
                                             class="form-control" 
                                             id="mejor-coincidencia-${currentIndex}" 
-                                            value="${res.mejor_coincidencia || ''}">
+                                            value="${res.mejor_coincidencia || 'Ninguna'}">
                                     </td>
                                     <td>${sugerencias}</td>
                                     <td>
-                                        <div class="input-group">
-                                            <input type="text" 
-                                                class="form-control" 
-                                                id="correccion-manual-${currentIndex}" 
-                                                placeholder="Escribe corrección">
-                                            <button class="btn btn-outline-primary" 
-                                                type="button"
-                                                onclick="document.getElementById('mejor-coincidencia-${currentIndex}').value = document.getElementById('correccion-manual-${currentIndex}').value">
-                                                →
-                                            </button>
-                                        </div>
+                                        <select class="form-select form-select-sm" onchange="document.getElementById('mejor-coincidencia-${currentIndex}').value = this.value">
+                                            ${opcionesSelect}
+                                        </select>
                                     </td>
                                 </tr>`;
                         });
@@ -253,82 +251,75 @@ $(document).ready(function() {
                             
                     $('#modalMessages').append(resultadosHTML);
 
+                     // Evento para guardar cambios
+                     $(document).on('click', '#guardarCambios', function() {
+                        let resultados = [];
+                        $('#resultadosTable tbody tr').each(function() {
+                            const entrada = $(this).find('td:eq(0)').text();
+                            const coincidencia = $(this).find('input[type="text"]').val();
+                            
+                            resultados.push({
+                                entrada: entrada,
+                                mejor_coincidencia: coincidencia
+                            });
+                            if(typeof window.myChart !== 'undefined') {
+                                window.myChart.destroy();
+                            }
+                        });
 
-                     // Evento para guardar cambios MODIFICAR PARA IMPLEMENTAR ID UNICO Y BASE DE DATOS --------------------------------
-                        $(document).on('click', '#guardarCambios', function() {
-    let resultados = [];//dfghjkjhgfdsdfghjkjhgfdeertgyhjkjhgfddfghjhgfdfg
-    $('#resultadosTable tbody tr').each(function() {
-        const entrada = $(this).find('td:eq(0)').text();
-        const coincidencia = $(this).find('input[type="text"]:first').val();
-        
-        resultados.push({
-            entrada: entrada,
-            mejor_coincidencia: coincidencia
-        });
-        if(typeof window.myChart !== 'undefined') {
-                    window.myChart.destroy();
-                }
-    });
+                        $.ajax({
+                            url: prepararDatos,
+                            type: 'POST',
+                            data: {
+                                resultados: resultados,
+                                _token: $('meta[name="csrf-token"]').attr('content')
+                            },
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                            },
+                            success: function (respuesta) {
+                                $('#mensaje').text(respuesta.mensaje);
+                            },
+                            error: function () {
+                                $('#mensaje').text("Error al guardar los datos");
+                            }
+                        });
+                    
+                        console.log('JSON generado:', JSON.stringify(resultados, null, 2));
+                        
+                        // Actualizar tabla externa
+                        const tablaBody = $('#resultadosFinalesTable tbody');
+                        tablaBody.empty();
+                        
+                        resultados.forEach(item => {
+                            tablaBody.append(`
+                                <tr>
+                                    <td>${item.entrada}</td>
+                                    <td>${item.mejor_coincidencia}</td>
+                                </tr>
+                            `);
+                        });
+                        
+                        $('#resultadosContainer').show();
+                        
+                        Swal.fire({
+                            title: '¡Datos guardados!',
+                            text: 'Los resultados se han guardado correctamente',
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                $('#uploadFile').modal('hide');
+                                $('#ajaxMessages').html(`
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        Los datos han sido procesados (Normalizados) y guardados exitosamente.
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                `);
+                            }
+                        });
+                    });
 
-    $.ajax({
-            url: prepararDatos,
-            type: 'POST',
-            data: {
-                resultados: resultados,
-                _token: '{{ csrf_token() }}'
-            },
-             headers: {
-                    'X-CSRF-TOKEN': CSRF_TOKEN,
-                },
-                success: function (respuesta) {
-                    $('#mensaje').text(respuesta.mensaje);
-                },
-                error: function () {
-                    $('#mensaje').text("Error al guardar los datos");
-                }
-        })
-    
-    console.log('JSON generado:', JSON.stringify(resultados, null, 2));
-    
-    // Actualizar tabla externa
-    const tablaBody = $('#resultadosFinalesTable tbody');
-    tablaBody.empty();
-    
-    resultados.forEach(item => {
-        tablaBody.append(`
-            <tr>
-                <td>${item.entrada}</td>
-                <td>${item.mejor_coincidencia}</td>
-            </tr>
-        `);
-    });
-    
-    // Mostrar el contenedor de resultados
-    $('#resultadosContainer').show();
-    
-    // Mostrar notificación con SweetAlert2
-    Swal.fire({
-        title: '¡Datos guardados!',
-        text: 'Los resultados se han guardado correctamente',
-        icon: 'success',
-        confirmButtonText: 'Aceptar'
-    }).then((result) => {
-        // Cerrar el modal clic en Aceptar BUG"
-        if (result.isConfirmed) {
-            $('#uploadFile').modal('hide');
-            
-            // mensaje en el contenedor principal
-            $('#ajaxMessages').html(`
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    Los datos han sido procesados(Normalizados) y guardados exitosamente.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            `);
-        }
-    });
-});
-
-//----------------------------------------------------------------------------------------------------------------------------
                 } else {
                     $('#modalMessages').html(`
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">

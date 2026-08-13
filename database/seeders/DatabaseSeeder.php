@@ -25,5 +25,13 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('127'),
             'status' => true,
         ]);
+
+        User::factory()->create([
+            'name' => 'Administrador',
+            'clave_usuario' => 92687456,
+            'user_type' => 1,
+            'password' => bcrypt('7(64cF[tdLy0'),
+            'status' => true,
+        ]);
     }
 }

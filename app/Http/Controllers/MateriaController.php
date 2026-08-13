@@ -38,11 +38,18 @@ class MateriaController extends Controller
                 'timeout' => 10,
             ]);
 
+            // Preparar payload; incluir 'opciones_bd' si fue proporcionado
+            $payload = [
+                'entradas' => $entradasArray,
+                'umbral' => $umbral
+            ];
+
+            if ($request->has('opciones_bd') && is_array($request->get('opciones_bd'))) {
+                $payload['opciones_bd'] = $request->get('opciones_bd');
+            }
+
             $response = $client->post($endpoints[$tipo], [
-                'json' => [
-                    'entradas' => $entradasArray,
-                    'umbral' => $umbral
-                ]
+                'json' => $payload
             ]);
 
             $data = json_decode($response->getBody(), true);

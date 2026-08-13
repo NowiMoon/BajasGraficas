@@ -4,7 +4,24 @@
 <div class="container pt-5" style="margin-top: 100px">
     <div class="row justify-content-center">
 
-        <!-- Módulo: Nuevo usuario (mantener formulario existente) -->
+        <!-- Alertas de Sesión (Éxito / Error) -->
+        <div class="col-md-8">
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+        </div>
+
+        <!-- Módulo: Nuevo usuario -->
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header" style="background-color: #004A98; color:white">{{ __('Nuevo usuario') }}</div>
@@ -97,7 +114,7 @@
         </div>
 
         <!-- Módulo: Usuarios existentes -->
-        <div class="col-md-8 mb-4">
+        <div class="col-md-8 mb-4 mt-4">
             <div class="card">
                 <div class="card-header" style="background-color: #004A98; color:white">Usuarios existentes</div>
                 <div class="card-body">
@@ -133,7 +150,6 @@
                                                 </form>
                                             </td>
                                             <td>
-                                                <!-- botón que abre el modal; data-url se usa para asignar action del formulario -->
                                                 <button type="button"
                                                     class="btn btn-sm btn-warning btn-open-reset"
                                                     data-url="{{ url('/users/'.$user->id.'/reset-password') }}"
@@ -153,85 +169,131 @@
             </div>
         </div>
 
+        {{-- Botón: Eliminar todos los alumnos (solo Administrador) --}}
+        @if(Auth::check() && Auth::user()->user_type === 1)
+        <div class="col-md-8 mb-4 mt-4">
+            <div class="card">
+                <div class="card-header" style="background-color: #004A98; color:white">Eliminar todos los alumnos</div>
+                <div class="card-body">
+                    <form method="POST" action="{{ route('alumnos.destroyAll') }}" class="delete-all-form d-inline">
+                        @csrf
+                        <input type="hidden" name="admin_password" id="admin_password" value="">
+                        <button type="submit" class="btn btn-danger" id="btn-delete-all">
+                            Eliminar todos los alumnos
+                        </button>
+                    </form>
+                    <p class="mt-2 text-muted small">Esta acción eliminará todos los registros de alumnos y no se puede deshacer.</p>
+                </div>
+            </div>
+        </div>
+        @endif
+
     </div>
 </div>
 @endsection
+
 @section('scripts')
-    @if(session('success'))
+    @parent
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        Swal.fire({
-            icon: 'success',
-            title: '¡Éxito!',
-            text: '{{ session('success') }}',
-            confirmButtonText: 'Aceptar'
-        });
-    </script>
-@endif
-
-@if(session('error'))
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: '{{ session('error') }}',
-            confirmButtonText: 'Aceptar'
-        });
-    </script>
-@endif
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const resetModalEl = document.getElementById('resetPasswordModal');
-    const resetForm = document.getElementById('resetPasswordForm');
-    const resetUserName = document.getElementById('resetUserName');
-    const newPass = document.getElementById('new_password');
-    const newPassConf = document.getElementById('new_password_confirmation');
-    const errorBox = document.getElementById('reset-pass-error');
-
-    let bsResetModal = null;
-    if (resetModalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        bsResetModal = new bootstrap.Modal(resetModalEl);
-    }
-
-    document.querySelectorAll('.btn-open-reset').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const url = this.dataset.url;
-            const name = this.dataset.name || '';
-            if (!resetForm) return;
-            resetForm.action = url;
-            if (resetUserName) resetUserName.value = name;
-            if (newPass) newPass.value = '';
-            if (newPassConf) newPassConf.value = '';
-            if (errorBox) errorBox.style.display = 'none';
-
-            if (bsResetModal) {
-                bsResetModal.show();
-            } else if (typeof $ !== 'undefined' && $(resetModalEl).modal) {
-                $(resetModalEl).modal('show');
-            }
-        });
-    });
-
-    if (resetForm) {
-        resetForm.addEventListener('submit', function (e) {
-            if (newPass && newPassConf && newPass.value !== newPassConf.value) {
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.delete-all-form').forEach(function(form) {
+            form.addEventListener('submit', function (e) {
                 e.preventDefault();
-                if (errorBox) {
-                    errorBox.textContent = 'Las contraseñas no coinciden.';
-                    errorBox.style.display = 'block';
+
+                if (typeof Swal === 'undefined') {
+                    if (confirm('¿Eliminar todos los alumnos? Esta acción no se puede deshacer.')) {
+                        form.submit();
+                    }
+                    return;
                 }
-                return false;
-            }
-            const btn = resetForm.querySelector('button[type="submit"]');
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = 'Procesando...';
-            }
+
+                Swal.fire({
+                    title: 'Confirmación administrativa',
+                    text: 'Para continuar, ingresa tu contraseña de administrador.',
+                    input: 'password',
+                    inputAttributes: {
+                        autocapitalize: 'off',
+                        autocorrect: 'off'
+                    },
+                    inputPlaceholder: 'Contraseña del administrador',
+                    showCancelButton: true,
+                    confirmButtonText: 'Confirmar y eliminar',
+                    cancelButtonText: 'Cancelar',
+                    preConfirm: (password) => {
+                        if (!password) {
+                            Swal.showValidationMessage('La contraseña es obligatoria');
+                            return false;
+                        }
+
+                        return fetch("{{ route('admin.validate_password') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ password: password })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data || data.valid !== true) {
+                                const msg = (data && data.message) ? data.message : 'Contraseña incorrecta';
+                                Swal.showValidationMessage(msg);
+                                return false;
+                            }
+                            return password;
+                        })
+                        .catch(() => {
+                            Swal.showValidationMessage('Error validando la contraseña');
+                            return false;
+                        });
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed && result.value) {
+                        const hidden = document.getElementById('admin_password');
+                        if (hidden) hidden.value = result.value;
+                        form.submit();
+                    }
+                });
+            });
         });
-    }
-});
-</script>
+
+        const resetModalEl = document.getElementById('resetPasswordModal');
+        const resetForm = document.getElementById('resetPasswordForm');
+        const resetUserName = document.getElementById('resetUserName');
+        const newPassword = document.getElementById('new_password');
+        const newPasswordConfirmation = document.getElementById('new_password_confirmation');
+        const resetPassError = document.getElementById('reset-pass-error');
+
+        if (resetModalEl && resetForm && resetUserName) {
+            const resetModal = new bootstrap.Modal(resetModalEl);
+
+            document.querySelectorAll('.btn-open-reset').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    resetForm.action = btn.dataset.url;
+                    resetUserName.value = btn.dataset.name || '';
+                    newPassword.value = '';
+                    newPasswordConfirmation.value = '';
+                    resetPassError.style.display = 'none';
+                    resetPassError.textContent = '';
+                    resetModal.show();
+                });
+            });
+
+            resetForm.addEventListener('submit', function (e) {
+                if (newPassword.value !== newPasswordConfirmation.value) {
+                    e.preventDefault();
+                    resetPassError.textContent = 'Las contraseñas no coinciden.';
+                    resetPassError.style.display = 'block';
+                    return;
+                }
+                resetPassError.style.display = 'none';
+                resetPassError.textContent = '';
+            });
+        }
+    });
+    </script>
 @endsection
 
 <!-- Modal para restablecer contraseña -->

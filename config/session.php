@@ -200,7 +200,7 @@ return [
     */
 
     'same_site' => env('SESSION_SAME_SITE', 'lax'),
-
+    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', true),
     /*
     |--------------------------------------------------------------------------
     | Partitioned Cookies

@@ -1,146 +1,195 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="d-flex ps-3 align-items-center bg-secondary bg-opacity-25 vw-100" style="height: 50px; margin-top: 108px">
-    <a class="pe-3" href="{{ route('dashboard') }}"><img src="{{ asset('images/back.svg') }}" alt="Regresar"></a>
-    <h3 class="fw-bold mb-0">Gestión de materias</h1>
-</div>
+<!-- Contenedor general con margen superior suficiente para que no lo tape la barra fija -->
+<div class="container-fluid px-0" style="margin-top: 115px;">
+    <!-- Encabezado superior adaptado -->
+    <div class="bg-white border-bottom shadow-sm px-4 py-3 mb-4">
+        <div class="container d-flex align-items-center">
+            <a class="btn btn-outline-secondary btn-sm me-3 rounded-circle d-flex align-items-center justify-content-center" href="{{ route('dashboard') }}" style="width: 38px; height: 38px;">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h4 class="fw-bold mb-0 text-dark">Gestión de Materias</h4>
+                <p class="text-muted small mb-0">Administra el catálogo de materias del sistema de forma manual o masiva mediante archivos CSV.</p>
+            </div>
+        </div>
+    </div>
 
-<div class="py-4 px-5">
-    <div class="d-flex flex-column bg-secondary bg-opacity-25" style="padding:50px 200px 50px 200px">
-        <div class="container">
-            <div class="d-flex" style="gap:1rem;">
-                <!-- Registrar materia: 80% -->
-                <div style="flex: 0 0 80%;">
-                    <h4 class="fw-bold">Registrar materia</h4>
-                    <div class="">
-                        <form method="POST" action="{{ route('gestion_materias.store') }} ">
+    <!-- Cuerpo principal -->
+    <div class="container pb-5">
+        <div class="row g-4">
+            <!-- Columna Izquierda: Registro Manual y Carga Masiva -->
+            <div class="col-lg-7">
+                <!-- Tarjeta: Registrar Materia Individual -->
+                <div class="card border-0 shadow-sm mb-4 rounded-3">
+                    <div class="card-header bg-gradient text-white py-3" style="background-color: #004A98;">
+                        <h5 class="card-title mb-0 fw-semibold">
+                            <i class="fas fa-book-medical me-2"></i>Registrar Materia Individual
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" action="{{ route('gestion_materias.store') }}">
                             @csrf
-                            <div class="d-flex flex-column">
-                                <div class="py-4 d-flex align-items-center">
-                                    <label for="clave_materia" class="w-25">Clave materia: *</label>
-                                    <input class="form-control w-50" type="text" id="clave_materia" name="clave_materia" placeholder="Clave de la materia" required>
+                            <div class="mb-3">
+                                <label for="clave_materia" class="form-label fw-medium text-secondary">Clave de la materia: <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-key text-muted"></i></span>
+                                    <input class="form-control" type="text" id="clave_materia" name="clave_materia" placeholder="Ej. 2151" required>
                                 </div>
-                                <div class="pb-4 align-items-center d-flex">
-                                    <label for="nombre_materia" class="w-25">Nombre materia: *</label>
-                                    <input class="form-control w-50" type="text" id="nombre_materia" name="nombre_materia" placeholder="Nombre de la materia" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nombre_materia" class="form-label fw-medium text-secondary">Nombre de la materia: <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-signature text-muted"></i></span>
+                                    <input class="form-control" type="text" id="nombre_materia" name="nombre_materia" placeholder="Ej. Matemáticas Discretas I" required>
                                 </div>
                             </div>
                             <div class="text-end">
-                                <button type="submit" class="btn btn-primary">{{ __('Añadir') }}</button>
+                                <button type="submit" class="btn btn-primary px-4 fw-semibold" style="background-color: #004A98; border-color: #004A98;">
+                                    <i class="fas fa-plus-circle me-1"></i> Añadir Materia
+                                </button>
                             </div>
                         </form>
                     </div>
                 </div>
 
-                <!-- Materias registradas: 20% -->
-                <div style="flex: 0 0 20%; m-0; p-0;">
-                    <h4 class="fw-bold pt-0">Materias registradas</h4>
-
-                    @if(!isset($materias) || $materias->isEmpty())
-                        <div class="bg-white rounded shadow-sm">
-                            <p class="mb-0">No hay materias registradas.</p>
-                        </div>
-                    @else
-                        <div class="table-responsive" style="max-height:200px; overflow:auto;">
-                            <table id="materias-table" class="table table-bordered mb-0">
-                                 <thead>
-                                     <tr>
-                                         <th>Clave</th>
-                                         <th>Nombre</th>
-                                     </tr>
-                                 </thead>
-                                 <tbody>
-                                     @foreach($materias as $materia)
-                                         <tr>
-                                            <td class="clave-cell">{{ $materia->clave_materia }}</td>
-                                             <td>{{ $materia->nombre_materia }}</td>
-                                         </tr>
-                                     @endforeach
-                                 </tbody>
-                             </table>
-                         </div>
-                     @endif
-                 </div>
-            </div>
-        </div>
-        <hr>
-        <div class="py-4">
-            <form method="POST" action="{{ 'upload_subjects' }}" enctype="multipart/form-data">
-                @csrf
-                <h4 class="fw-bold">Subir archivo .csv</h4>
-                <div class="d-flex align-items-center py-2">
-                    <img src="{{ asset('images/document_search.png') }}" alt="" style="height: 80px">
-                    <div class="d-flex flex-column">
-                        <label for="file" class="fs-4">Selecciona un archivo  sdfsds .csv:</label>
-                        <input type="file" id="file" name="file" accept=".csv" required class="fs-4">
+                <!-- Tarjeta: Subir Archivo CSV -->
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-gradient text-white py-3" style="background-color: #00B2E3;">
+                        <h5 class="card-title mb-0 fw-semibold text-white">
+                            <i class="fas fa-file-upload me-2"></i>Carga Masiva de Materias (.csv)
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" action="{{ route('upload_subjects') }}" enctype="multipart/form-data">
+                            @csrf
+                            <div class="d-flex align-items-center gap-3 p-3 border border-dashed rounded-3 bg-light mb-3">
+                                <img src="{{ asset('images/document_search.png') }}" alt="Subir archivo" style="height: 60px;">
+                                <div class="flex-grow-1">
+                                    <label for="file" class="form-label fw-semibold mb-1 text-dark">Selecciona tu archivo CSV:</label>
+                                    <input type="file" id="file" name="file" accept=".csv,.txt" required class="form-control form-control-sm">
+                                    <div class="form-text text-muted small mt-1">El archivo debe contener las columnas <code class="text-primary">clave_c</code> y <code class="text-primary">nombre_c</code>.</div>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-info text-white px-4 fw-semibold" style="background-color: #00B2E3; border-color: #00B2E3;">
+                                    <i class="fas fa-upload me-1"></i> Subir y Procesar
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <div class="text-end">
-                    <button type="submit" class="btn btn-primary">{{ __('Añadir') }}</button>
+            </div>
+
+            <!-- Columna Derecha: Tabla de Materias Registradas con Búsqueda Integrada -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-3 h-100">
+                    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fw-semibold text-dark">
+                            <i class="fas fa-list-alt text-primary me-2"></i>Materias Registradas
+                        </h5>
+                        <span class="badge bg-primary rounded-pill px-3 py-2">
+                            {{ isset($materias) ? $materias->count() : 0 }} total
+                        </span>
+                    </div>
+                    <div class="card-body p-3 d-flex flex-column">
+                        @if(!isset($materias) || $materias->isEmpty())
+                            <div class="text-center py-5 my-auto text-muted">
+                                <i class="fas fa-folder-open fa-3x mb-3 text-secondary opacity-50"></i>
+                                <p class="mb-0">No hay materias registradas en el sistema.</p>
+                            </div>
+                        @else
+                            <!-- Buscador rápido en vivo -->
+                            <div class="mb-3">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
+                                    <input type="text" id="buscadorTablaMaterias" class="form-control" placeholder="Filtrar por clave o nombre...">
+                                </div>
+                            </div>
+
+                            <div class="table-responsive flex-grow-1 rounded border" style="max-height: 420px; overflow-y: auto;">
+                                <table id="materias-table" class="table table-hover table-striped align-middle mb-0" style="font-size: 0.9rem;">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th class="py-2 px-3">Clave</th>
+                                            <th class="py-2 px-3">Nombre</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($materias as $materia)
+                                            <tr>
+                                                <td class="clave-cell fw-semibold text-primary py-2 px-3">{{ $materia->clave_materia }}</td>
+                                                <td class="nombre-cell py-2 px-3">{{ $materia->nombre_materia }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="no-results-materias" class="text-center text-muted small py-3" style="display: none;">
+                                No se encontraron coincidencias para tu búsqueda.
+                            </div>
+                        @endif
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+@endsection
 
 @section('scripts')
-    @if(session('success'))
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
+    @parent
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        @if(session('success'))
             Swal.fire({
                 icon: 'success',
                 title: '¡Éxito!',
-                text: '{{ session('success') }}',
-                confirmButtonText: 'Aceptar'
+                text: "{{ session('success') }}",
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#004A98'
             });
-        </script>
-    @endif
+        @endif
 
-    @if(session('error'))
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
+        @if(session('error'))
             Swal.fire({
                 icon: 'error',
-                title: 'Error',
-                text: '{{ session('error') }}',
-                confirmButtonText: 'Aceptar'
+                title: 'Atención',
+                text: "{{ session('error') }}",
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#dc3545'
             });
-        </script>
-    @endif
+        @endif
 
-    <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const input = document.getElementById('clave_materia'); // input existente
+            const buscador = document.getElementById('buscadorTablaMaterias');
             const table = document.getElementById('materias-table');
-            if (!input || !table) return;
+            if (!buscador || !table) return;
+            
             const tbody = table.tBodies[0];
-            // crear indicador "no resultados" si no existe
-            let noResults = document.getElementById('no-results-materias');
-            if (!noResults) {
-                noResults = document.createElement('div');
-                noResults.id = 'no-results-materias';
-                noResults.className = 'text-center small mt-2';
-                noResults.style.display = 'none';
-                noResults.textContent = 'No se encontraron resultados.';
-                table.parentElement.appendChild(noResults);
-            }
+            const noResults = document.getElementById('no-results-materias');
 
-            input.addEventListener('input', function (e) {
-                const q = (e.target.value || '').trim();
+            buscador.addEventListener('input', function (e) {
+                const q = (e.target.value || '').toLowerCase().trim();
                 let visible = 0;
+
                 Array.from(tbody.rows).forEach(row => {
-                    const clave = (row.querySelector('.clave-cell')?.textContent || '').trim();
-                    if (q === '' || clave.indexOf(q) !== -1) {
+                    const clave = (row.querySelector('.clave-cell')?.textContent || '').toLowerCase();
+                    const nombre = (row.querySelector('.nombre-cell')?.textContent || '').toLowerCase();
+
+                    if (q === '' || clave.includes(q) || nombre.includes(q)) {
                         row.style.display = '';
                         visible++;
                     } else {
                         row.style.display = 'none';
                     }
                 });
-                noResults.style.display = (visible === 0 ? 'block' : 'none');
+
+                if (noResults) {
+                    noResults.style.display = (visible === 0 ? 'block' : 'none');
+                }
             });
         });
     </script>
-@endsection
 @endsection
